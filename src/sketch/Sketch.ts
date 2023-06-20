@@ -3,20 +3,25 @@ import { Content, P5 } from '../types';
 import { TmpEdge } from './TmpEdge';
 import { Edge } from './Edge';
 import { Stage } from './Stage';
-import { Application, Microservice } from './Application';
+import { Application, Microservice, Monolith } from './Application';
 import { RDBMS } from './Database';
 import { Transfer } from './Transfer';
-import { number } from 'zod';
 import { LoadBalancer } from './LoadBalancer';
+import { Job } from './Job';
 
 export type SketchProps = {
   width: number;
   height: number;
 }
 
+const sensitivity = 0.005;
+const zMin = 0.05;
+const zMax = 9.00;
+
 let tmpEdge: TmpEdge | null = null;
 let tmpNode: Node | null = null;
 let target: Node | null = null;
+let zoom = 1.00;
 
 const nodes: Map<string, Node> = new Map();
 const children: Node[] = [];
@@ -38,6 +43,7 @@ function Sketch(
   sketch.editNode = editNode;
   sketch.setup = setup
   sketch.draw = draw;
+  // sketch.mouseWheel = mouseWheel;
   sketch.mouseClicked = mouseClicked;
   sketch.mouseDragged = mouseDragged;
   sketch.mousePressed = mousePressed;
@@ -47,6 +53,9 @@ function Sketch(
   on('add_application', addApplication);
   on('set_application', updateApplication);
   on('add_database', addDatabase);
+  on('add_job', addJob);
+  on('stop_job', stopJob);
+  on('start_job', startJob);
   on('send_request', sendRequest);
 
   function setup() {
@@ -55,6 +64,7 @@ function Sketch(
       cluster: sketch.loadImage('/assets/cluster.png'),
       database: sketch.loadImage('/assets/database.png'),
       fire: sketch.loadImage('/assets/fire.png'),
+      job: sketch.loadImage('/assets/job.png'),
       loadBalancer: sketch.loadImage('/assets/loadBalancer.png'),
       microservice: sketch.loadImage('/assets/microservice.png'),
       monolith: sketch.loadImage('/assets/monolith.png'),
@@ -66,6 +76,7 @@ function Sketch(
 
   function draw() {
     sketch.background(255);
+    sketch.scale(zoom);
     sketch.stroke(0);
     sketch.strokeWeight(2);
     sketch.noFill();
@@ -140,14 +151,23 @@ function Sketch(
     tmpNode = null;
   }
 
+  function mouseWheel(event: any) {
+    zoom -= sensitivity * event.delta;
+    zoom = sketch.constrain(zoom, zMin, zMax);
+    //uncomment to block page scrolling
+    return false;
+  }
+
   function addApplication(content: Content) {
     const { id, label, type } = content;
 
     let node;
     if (type === 'loadbalancer') {
       node = new LoadBalancer(sketch, stage, id, 50, 50, label)
-    } else {
+    } else if (type === 'microservice') {
       node = new Microservice(sketch, stage, id, 50, 50, label)
+    } else {
+      node = new Monolith(sketch, stage, id, 50, 50, label)
     }
 
     children.push(node);
@@ -167,6 +187,21 @@ function Sketch(
     const node = new RDBMS(sketch, stage, id, 50, 50, label);
     children.push(node);
     nodes.set(id, node);
+  }
+  
+  function addJob(content: Content) {
+    const { id, label } = content;
+    const node = new Job(sketch, stage, id, 50, 50, label);
+    children.push(node);
+    nodes.set(id, node);
+  }
+
+  function stopJob(content: Content) {
+    (nodeOfId(content.id) as Job)?.stopCron();
+  }
+  
+  function startJob(content: Content) {
+    (nodeOfId(content.id) as Job)?.startCron();
   }
   
   function sendRequest(content: Content) {    

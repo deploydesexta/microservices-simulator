@@ -22,6 +22,7 @@ const services: ServiceItem[] = [
   { id: 'documentdb', name: 'Document DB', group: 'databases' },
   { id: 'kvs', name: 'Key Value Store', group: 'databases' },
   { id: 'rdbms', name: 'RDBMS', group: 'databases' },
+  { id: 'cron', name: 'Cron Job', group: 'job' },
   { id: 'kafka', name: 'Kafka', group: 'streaming' },
   { id: 'kinesis', name: 'Kinesis', group: 'streaming' },
   { id: 'rabbitmq', name: 'RabbitMQ', group: 'messaging' },
@@ -52,11 +53,12 @@ const Services = () => {
   const { emit } = useEvents();
 
   const onClick = (service: ServiceItem) => {
-    const data = { id: nanoid(3), type: service.id, name: service.name };
+    const data = { id: nanoid(3), type: service.id, label: service.name };
 
     switch (service.group) {
       case 'applications': emit('add_application', data); break;
       case 'databases': emit('add_database', data); break;
+      case 'job': emit('add_job', data); break;
     }
   };
 

@@ -6,6 +6,7 @@ export type Images = {
   cluster: Image;
   database: Image;
   fire: Image;
+  job: Image;
   loadBalancer: Image;
   microservice: Image;
   monolith: Image;
