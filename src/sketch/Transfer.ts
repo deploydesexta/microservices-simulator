@@ -7,52 +7,57 @@ class Transfer {
   private distX: number = 0;
   private distY: number = 0;
   private ridePct: number = 0.0;
-  private finished: boolean = false;
   private step: number = 0.02;
-  private radii: number = 5;
+  private radii: number = 7;
+  private _content: Content;
 
   constructor(
     private sketch: P5,
     private from: Node,
     private to: Node,
-    private message: Content,
+    content: Content,
   ) {
-
-    this.x = from.x;
-    this.y = from.y;
+    this.x = from.middleX;
+    this.y = from.middleY;
+    this._content = content;
     this.updateDistance();
   }
 
   public draw() {
-    this.ridePct += this.step;
-    this.sketch.fill(255);
+    this.sketch.fill(255, 0, 0);
     this.sketch.ellipse(this.x, this.y, this.radii * 2, this.radii * 2);
   }
 
-  public afterDraw() {
-    if (this.ridePct >= 1.0) {
-      this.finished = true;
-      // this.from.transferDelivered(this);
-      // this.to.trasnferArrived(this);
-    }
+  public notify() {
+    this.from.transferDelivered(this);
+    this.to.trasnferArrived(this);
   }
 
+  public content(): Content {
+    return this._content;
+  }
+  
   public update() {
     this.updateDistance();
-    const ridePct = this.ridePct;
-    if (ridePct < 1.0) {
-      this.x = this.from.x + (ridePct * this.distX);
-      this.y = this.from.y + (ridePct * this.distY);
+    this.updateRidePct();
+
+    if (this.ridePct <= 1.0) {
+      this.x = this.from.middleX + (this.ridePct * this.distX);
+      this.y = this.from.middleY + (this.ridePct * this.distY);
     }
   }
   
   public isFinished(): boolean {
-    return this.finished;
+    return this.ridePct >= 1.0;
+  }
+
+  private updateRidePct() {
+    this.ridePct += this.step;
   }
 
   private updateDistance() {
-    this.distX = this.to.x - this.from.x;
-    this.distY = this.to.y - this.from.y;
+    this.distX = this.to.middleX - this.from.middleX;
+    this.distY = this.to.middleY - this.from.middleY;
   }
 }
 

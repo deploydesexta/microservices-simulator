@@ -9,15 +9,17 @@ class Stage {
   }
 
   public draw() {
-    this.transfers.forEach((transfer: Transfer, index: number) => {
+    for (let i = 0; i < this.transfers.length; i++) {
+      const transfer = this.transfers[i];
+
       transfer.update();
       transfer.draw();
-      transfer.afterDraw();
 
       if (transfer.isFinished()) {
-          this.transfers.splice(index);
-      }      
-    });
+        transfer.notify();
+        this.transfers.splice(i, 1);
+      }
+    }
   }
 }
 

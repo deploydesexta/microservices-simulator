@@ -5,21 +5,20 @@ import { Producer } from "./Producer";
 import { Stage } from "./Stage";
 import { Transfer } from "./Transfer";
 
-abstract class Database extends Node implements Producer {
+abstract class Application extends Node implements Producer {
   
   abstract produce(to: Node, message: { [key: string]: any; }): void;
   abstract updateProps(label: string): void;
 }
 
-class RDBMS extends Database {
+class LoadBalancer extends Application {
 
   private stage: Stage;
   private image: Image;
   private _height: number;
   private _width: number;
   private _label: string;
-  private _ops: number;
-
+  
   constructor(
     sketch: P5, 
     stage: Stage,
@@ -30,25 +29,15 @@ class RDBMS extends Database {
   ) {
     super(sketch, id, x, y);
     this.stage = stage;
-    this.image = sketch.images.database;
+    this.image = sketch.images.loadBalancer;
     this._width = this.image.width / 2;
     this._height = this.image.height / 2;
     this._label = label || id;
-    this._ops = 0;
-
-    setInterval(() => {
-      if (this._ops > 0) {
-        this._ops -= 1;
-      }
-    }, 1_000);
   }
 
   public draw() {
     this.sketch.image(this.image, this.x, this.y, this._width, this._height);
     this.drawLabel();
-    if (this._ops >= 5) {
-      this.sketch.image(this.sketch.images.fire, this.x, this.y, this._width, this._height);
-    }
   }
 
   public mouseClicked(): void {
@@ -61,15 +50,21 @@ class RDBMS extends Database {
     const y = this.sketch.mouseY - (this._height / 2);
     this.update(x, y);
   }
-
+  
   public trasnferArrived(tranfer: Transfer): void {
-    this._ops += 1;
+    console.log('transfer arrived', tranfer);
+    // round robing to outgoing nodes
+    const nextNode = this.outgoing.shift();
+    if (nextNode) {
+      this.produce(nextNode, tranfer.content());
+      this.outgoing.push(nextNode);
+    }
   }
   
   public transferDelivered(tranfer: Transfer): void {
-
+    console.log('transfer delivered', tranfer);
   }
-
+  
   public width(): number {
     return this._width;
   }
@@ -82,8 +77,8 @@ class RDBMS extends Database {
     return this._label;
   }
 
-  public produce(to: Node, message: Content): void {
-    this.stage.push(new Transfer(this.sketch, this, to, message));
+  public produce(to: Node, content: Content): void {
+    this.stage.push(new Transfer(this.sketch, this, to, content));
   }
 
   public updateProps(label: string): void {
@@ -92,6 +87,5 @@ class RDBMS extends Database {
 }
 
 export {
-  Database,
-  RDBMS,
+  LoadBalancer,
 }

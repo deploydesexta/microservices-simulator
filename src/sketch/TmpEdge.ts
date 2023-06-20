@@ -16,8 +16,8 @@ class TmpEdge {
 
   public draw() {
     this.sketch.stroke(this.color);
-    this.sketch.strokeWeight(1);
-    this.sketch.line(this.from.x, this.from.y, this.toX, this.toY);
+    this.sketch.strokeWeight(2);
+    this.sketch.line(this.from.middleX, this.from.middleY, this.toX, this.toY);
   }
 
   public mouseDragged(): void {

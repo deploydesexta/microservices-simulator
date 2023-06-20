@@ -31,7 +31,11 @@ const useEvents = () => {
     myEmitter.emit(event, data);
   }
 
-  return { on, emit };
+  const reset = () => {
+    myEmitter.listeners = {};
+  }
+  
+  return { on, emit, reset };
 };
 
 export default useEvents;

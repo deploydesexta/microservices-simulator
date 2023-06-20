@@ -9,7 +9,6 @@ type FormsProps = {
 };
 
 const Forms = ({ className }: FormsProps) => {
-  console.log('Rendering Forms');
   const selectedNode = useStore(state => state.selectedNode);
   
   let form = null;

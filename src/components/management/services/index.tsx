@@ -16,11 +16,12 @@ type ServiceGroupProps = {
 };
 
 const services: ServiceItem[] = [
+  { id: 'monolith', name: 'Monolith', group: 'applications' },
+  { id: 'microservice', name: 'Microservice', group: 'applications' },
+  { id: 'loadbalancer', name: 'Load Balancer', group: 'applications' },
   { id: 'documentdb', name: 'Document DB', group: 'databases' },
   { id: 'kvs', name: 'Key Value Store', group: 'databases' },
   { id: 'rdbms', name: 'RDBMS', group: 'databases' },
-  { id: 'monolith', name: 'Monolith', group: 'applications' },
-  { id: 'microservice', name: 'Microservice', group: 'applications' },
   { id: 'kafka', name: 'Kafka', group: 'streaming' },
   { id: 'kinesis', name: 'Kinesis', group: 'streaming' },
   { id: 'rabbitmq', name: 'RabbitMQ', group: 'messaging' },

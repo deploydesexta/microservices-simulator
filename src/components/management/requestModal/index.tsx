@@ -14,12 +14,11 @@ const RequestModal = () => {
   }));
 
   if (!requestModalVisible || !selectedNode) {
-    console.log(requestModalVisible, selectedNode)
     return null;
   }
 
   const opstions = 
-    selectedNode.incoming.map(({ id }) => ({ value: id, label: id }))
+    selectedNode.outgoing.map(({ id }) => ({ value: id, label: id }))
 
   const onSend = () => {
     console.log('send', target);

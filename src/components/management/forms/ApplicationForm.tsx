@@ -23,7 +23,7 @@ type ApplicationFormProps = {
 const ApplicationForm = ({ node }: ApplicationFormProps) => {
   const initialValue = {
     id: node?.id || nanoid(3),
-    label: node?.label || '',
+    label: node?.label() || '',
   };
 
   const { emit } = useEvents();
@@ -36,6 +36,10 @@ const ApplicationForm = ({ node }: ApplicationFormProps) => {
 
   const onSubmit: SubmitHandler<FormData> = (data) => {
     emit('set_application', { ...data });
+  };
+
+  const onSendRequest = () => {
+    emit('send_request', { from: initialValue.id })
   };
 
   return (
@@ -55,10 +59,17 @@ const ApplicationForm = ({ node }: ApplicationFormProps) => {
       <div className="d-grid gap-2 d-md-flex justify-content-md-center py-3">
         <Button
           className="btn btn-secondary btn-sm"
-          onClick={() => toggleRequestModal()}
+          onClick={() => onSendRequest()}
           type="button"
         >
           Send request
+        </Button>
+        <Button
+          className="btn btn-secondary btn-sm"
+          onClick={() => toggleRequestModal()}
+          type="button"
+        >
+          Send request to
         </Button>
         <Button
           className="btn btn-primary btn-sm"

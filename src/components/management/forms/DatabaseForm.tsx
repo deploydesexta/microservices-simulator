@@ -22,7 +22,7 @@ type DatabaseFormProps = {
 const DatabaseForm = ({ node }: DatabaseFormProps) => {
   const initialValue = {
     id: node?.id || nanoid(3),
-    label: node?.label || '',
+    label: node?.label() || '',
   };
   
   const { emit } = useEvents();

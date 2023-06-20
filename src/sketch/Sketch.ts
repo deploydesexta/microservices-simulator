@@ -4,8 +4,10 @@ import { TmpEdge } from './TmpEdge';
 import { Edge } from './Edge';
 import { Stage } from './Stage';
 import { Application, Microservice } from './Application';
-import { Database, RDBMS } from './Database';
+import { RDBMS } from './Database';
 import { Transfer } from './Transfer';
+import { number } from 'zod';
+import { LoadBalancer } from './LoadBalancer';
 
 export type SketchProps = {
   width: number;
@@ -15,7 +17,7 @@ export type SketchProps = {
 let tmpEdge: TmpEdge | null = null;
 let tmpNode: Node | null = null;
 let target: Node | null = null;
-  
+
 const nodes: Map<string, Node> = new Map();
 const children: Node[] = [];
 const edges: Edge[] = [];
@@ -33,8 +35,8 @@ function Sketch(
   const WIDTH = sketch.windowWidth - 500;
   const HEIGHT = props.height;
 
-  sketch.setup = setup
   sketch.editNode = editNode;
+  sketch.setup = setup
   sketch.draw = draw;
   sketch.mouseClicked = mouseClicked;
   sketch.mouseDragged = mouseDragged;
@@ -48,6 +50,16 @@ function Sketch(
   on('send_request', sendRequest);
 
   function setup() {
+    sketch.images = {
+      cache: sketch.loadImage('/assets/cache.png'),
+      cluster: sketch.loadImage('/assets/cluster.png'),
+      database: sketch.loadImage('/assets/database.png'),
+      fire: sketch.loadImage('/assets/fire.png'),
+      loadBalancer: sketch.loadImage('/assets/loadBalancer.png'),
+      microservice: sketch.loadImage('/assets/microservice.png'),
+      monolith: sketch.loadImage('/assets/monolith.png'),
+    }
+
     sketch.createCanvas(WIDTH, HEIGHT);
     sketch.smooth();
   }
@@ -58,21 +70,17 @@ function Sketch(
     sketch.strokeWeight(2);
     sketch.noFill();
     sketch.rect(0, 0, WIDTH, HEIGHT);
-
-    children.forEach((child: Node) => {  
-      child.draw();
-    });
     
     edges.forEach((child: Edge) => {  
+      child.draw();
+    });
+
+    children.forEach((child: Node) => {  
       child.draw();
     });
   
     if (tmpEdge != null) {
       tmpEdge.draw();
-    }
-  
-    if (tmpNode != null) {
-      tmpNode.draw();
     }
 
     stage.draw();
@@ -95,12 +103,10 @@ function Sketch(
   }
 
   function mouseClicked() { 
-    console.log('mouseClicked');
     nodeBelowMouse()?.mouseClicked();
   }
 
   function mouseDragged() {
-    console.log('mouseDragged');
     if (target) {
       if (tmpEdge) {
         tmpEdge.mouseDragged();
@@ -111,7 +117,6 @@ function Sketch(
   }
   
   function mousePressed() {
-    console.log('mousePressed');
     target = nodeBelowMouse() || null;
   
     if (target != null && altOrShiftKeyPressed()) {
@@ -121,13 +126,13 @@ function Sketch(
   }
 
   function mouseReleased() {
-    console.log('mouseReleased');
     if (tmpEdge && tmpNode) {
       const from = tmpNode;
       const target = nodeBelowMouse();
       if (target && from.id !== target.id) {
         if (addEdge(from, target)) {
-          target.connectWith(from);
+          from.connectWith(target);
+          target.connectedWith(from);
         }
       }
     }
@@ -136,8 +141,15 @@ function Sketch(
   }
 
   function addApplication(content: Content) {
-    const { id, label } = content;
-    const node = new Microservice(sketch, stage, id, 50, 50, label)
+    const { id, label, type } = content;
+
+    let node;
+    if (type === 'loadbalancer') {
+      node = new LoadBalancer(sketch, stage, id, 50, 50, label)
+    } else {
+      node = new Microservice(sketch, stage, id, 50, 50, label)
+    }
+
     children.push(node);
     nodes.set(id, node)
   }
@@ -163,6 +175,10 @@ function Sketch(
 
     if (from && to) {
       stage.push(new Transfer(sketch, from, to, content))
+    } else if (from) {
+      from.outgoing.forEach((to: Node) => {
+        stage.push(new Transfer(sketch, from, to, content))
+      });
     }
   }
 
@@ -178,6 +194,50 @@ function Sketch(
     const edge = new Edge(sketch, from, to);
     edges.push(edge);
     return edge;
+  }
+
+  // From http://www.openprocessing.org/sketch/7029
+  /*
+   * Draws a lines with arrows of the given angles at the ends.
+   * x0 - starting x-coordinate of line
+   * y0 - starting y-coordinate of line
+   * x1 - ending x-coordinate of line
+   * y1 - ending y-coordinate of line
+   * startAngle - angle of arrow at start of line (in radians)
+   * endAngle - angle of arrow at end of line (in radians)
+   * solid - true for a solid arrow; false for an "open" arrow
+   */
+  sketch.arrowLine = (x0: number, y0: number, x1: number, y1: number, size: number, startAngle: number, endAngle: number, solid: boolean) => {
+    sketch.line(x0, y0, x1, y1);
+    if (startAngle !== 0) {
+      sketch.arrowHead(x0, y0, size,  sketch.atan2(y1 - y0, x1 - x0), startAngle, solid);
+    }
+    if (endAngle !== 0) {
+      sketch.arrowHead(x1, y1, size, sketch.atan2(y0 - y1, x0 - x1), endAngle, solid);
+    }
+  }
+  
+  /*
+   * Draws an arrow head at given location
+   * x0 - arrow vertex x-coordinate
+   * y0 - arrow vertex y-coordinate
+   * lineAngle - angle of line leading to vertex (radians)
+   * arrowAngle - angle between arrow and line (radians)
+   * solid - true for a solid arrow, false for an "open" arrow
+   */
+  sketch.arrowHead = (x0: number, y0: number, size: number, lineAngle: number, arrowAngle: number, solid: boolean) => {
+    const x2 = x0 + size * sketch.cos(lineAngle + arrowAngle);
+    const y2 = y0 + size * sketch.sin(lineAngle + arrowAngle);
+    const x3 = x0 + size * sketch.cos(lineAngle - arrowAngle);
+    const y3 = y0 + size * sketch.sin(lineAngle - arrowAngle);
+    // green color
+    sketch.stroke(255, 0, 0);
+    if (solid) {
+      sketch.triangle(x0, y0, x2, y2, x3, y3);
+    } else {
+      sketch.line(x0, y0, x2, y2);
+      sketch.line(x0, y0, x3, y3);
+    }
   }
 }
 
