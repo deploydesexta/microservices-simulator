@@ -14,20 +14,6 @@ export type SketchProps = {
   height: number;
 }
 
-const sensitivity = 0.005;
-const zMin = 0.05;
-const zMax = 9.00;
-
-let tmpEdge: TmpEdge | null = null;
-let tmpNode: Node | null = null;
-let target: Node | null = null;
-let zoom = 1.00;
-
-const nodes: Map<string, Node> = new Map();
-const children: Node[] = [];
-const edges: Edge[] = [];
-const stage = new Stage()
-
 function Sketch(
   sketch: P5,
   props: SketchProps,
@@ -37,13 +23,21 @@ function Sketch(
 
   const ALT = sketch.ALT;
   const SHIFT = sketch.SHIFT;
-  const WIDTH = sketch.windowWidth - 500;
+  const WIDTH = props.width;
   const HEIGHT = props.height;
+
+  let tmpEdge: TmpEdge | null = null;
+  let tmpNode: Node | null = null;
+  let target: Node | null = null;
+
+  const nodes: Map<string, Node> = new Map();
+  const children: Node[] = [];
+  const edges: Edge[] = [];
+  const stage = new Stage()
 
   sketch.editNode = editNode;
   sketch.setup = setup
   sketch.draw = draw;
-  // sketch.mouseWheel = mouseWheel;
   sketch.mouseClicked = mouseClicked;
   sketch.mouseDragged = mouseDragged;
   sketch.mousePressed = mousePressed;
@@ -76,7 +70,6 @@ function Sketch(
 
   function draw() {
     sketch.background(255);
-    sketch.scale(zoom);
     sketch.stroke(0);
     sketch.strokeWeight(2);
     sketch.noFill();
@@ -149,13 +142,6 @@ function Sketch(
     }
     tmpEdge = null;
     tmpNode = null;
-  }
-
-  function mouseWheel(event: any) {
-    zoom -= sensitivity * event.delta;
-    zoom = sketch.constrain(zoom, zMin, zMax);
-    //uncomment to block page scrolling
-    return false;
   }
 
   function addApplication(content: Content) {

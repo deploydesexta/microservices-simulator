@@ -1,3 +1,4 @@
+'use client';
 import './Management.css';
 import Services from './services';
 import RequestModal from './requestModal';

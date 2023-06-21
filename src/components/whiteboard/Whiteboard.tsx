@@ -1,5 +1,5 @@
+'use client';
 import { useEffect, useRef } from 'react';
-import p5 from 'p5';
 import './Whiteboard.css';
 import Sketch from '../../sketch/Sketch';
 import useStore from '../../store';
@@ -11,13 +11,14 @@ function Whiteboard() {
   const eventListener = useEvents();
   const editNode = useStore(state => state.editNode);
   const whiteboardRed = useRef<HTMLDivElement>(null);
-  
 
-  useEffect(() => {    
-    const props = { width: 800, height: 600 };
-    
+  useEffect(() => {
+    const p5 = require('p5');
+    const props = { width: window.innerWidth - 730, height: 600 };
+
+    whiteboardRed.current?.firstChild?.remove();
     const myP5 = new p5(
-      (p5) => Sketch(p5, props, eventListener.on, editNode), 
+      (p5: P5) => Sketch(p5, props, eventListener.on, editNode), 
       whiteboardRed.current || undefined,
     ) as P5;
 
@@ -28,7 +29,9 @@ function Whiteboard() {
   }, [eventListener, editNode]);
 
   return (
-    <div className="Whiteboard" ref={whiteboardRed} />
+    <div className="Whiteboard" ref={whiteboardRed}>
+      <h1>Loading...</h1>
+    </div>
   );
 }
 
