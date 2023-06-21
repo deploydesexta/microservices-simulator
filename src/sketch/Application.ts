@@ -6,7 +6,6 @@ import { Stage } from "./Stage";
 import { Transfer } from "./Transfer";
 
 abstract class Application extends Node implements Producer {
-  
   abstract produce(to: Node, message: { [key: string]: any; }): void;
   abstract updateProps(label: string): void;
 }
@@ -51,7 +50,7 @@ class Microservice extends Application {
     this.update(x, y);
   }
   
-  public trasnferArrived(tranfer: Transfer): void {
+  public transferArrived(tranfer: Transfer): void {
     this.outgoing.forEach((node: Node) => {
       this.produce(node, tranfer.content());
     });
@@ -122,7 +121,7 @@ class Monolith extends Application {
     this.update(x, y);
   }
   
-  public trasnferArrived(tranfer: Transfer): void {
+  public transferArrived(tranfer: Transfer): void {
     this.outgoing.forEach((node: Node) => {
       this.produce(node, tranfer.content());
     });
@@ -156,5 +155,5 @@ class Monolith extends Application {
 export {
   Application,
   Microservice,
-  Monolith,
-}
+  Monolith
+};

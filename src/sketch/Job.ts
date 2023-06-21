@@ -70,7 +70,7 @@ class Job extends Node implements Producer {
   }
 
 
-  public trasnferArrived(tranfer: Transfer): void {
+  public transferArrived(tranfer: Transfer): void {
 
   }
   
@@ -101,5 +101,5 @@ class Job extends Node implements Producer {
 }
 
 export {
-  Job,
-}
+    Job
+};

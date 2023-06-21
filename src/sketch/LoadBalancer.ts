@@ -6,7 +6,6 @@ import { Stage } from "./Stage";
 import { Transfer } from "./Transfer";
 
 abstract class Application extends Node implements Producer {
-  
   abstract produce(to: Node, message: { [key: string]: any; }): void;
   abstract updateProps(label: string): void;
 }
@@ -51,7 +50,7 @@ class LoadBalancer extends Application {
     this.update(x, y);
   }
   
-  public trasnferArrived(tranfer: Transfer): void {
+  public transferArrived(tranfer: Transfer): void {
     console.log('transfer arrived', tranfer);
     // round robing to outgoing nodes
     const nextNode = this.outgoing.shift();
@@ -87,5 +86,6 @@ class LoadBalancer extends Application {
 }
 
 export {
-  LoadBalancer,
-}
+  LoadBalancer
+};
+

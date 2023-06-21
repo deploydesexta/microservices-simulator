@@ -30,7 +30,7 @@ class Transfer {
 
   public notify() {
     this.from.transferDelivered(this);
-    this.to.trasnferArrived(this);
+    this.to.transferArrived(this);
   }
 
   public content(): Content {
@@ -62,5 +62,5 @@ class Transfer {
 }
 
 export {
-  Transfer,
-}
+    Transfer
+};

@@ -1,7 +1,6 @@
 import { P5 } from "../types";
 import { Transfer } from "./Transfer";
 
-const defaultColor = '#ff0000';
 const labelHeight = 15;
 
 export abstract class Node {
@@ -33,7 +32,7 @@ export abstract class Node {
   public abstract width(): number;
   public abstract height(): number;
   public abstract label(): string;
-  public abstract trasnferArrived(tranfer: Transfer): void;
+  public abstract transferArrived(tranfer: Transfer): void;
   public abstract transferDelivered(tranfer: Transfer): void;
 
   public isBelow(x: number, y: number): boolean {
