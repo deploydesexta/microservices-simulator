@@ -50,18 +50,18 @@ class LoadBalancer extends Application {
     this.update(x, y);
   }
   
-  public transferArrived(tranfer: Transfer): void {
-    console.log('transfer arrived', tranfer);
+  public transferArrived(transfer: Transfer): void {
+    console.log('transfer arrived', transfer);
     // round robing to outgoing nodes
     const nextNode = this.outgoing.shift();
     if (nextNode) {
-      this.produce(nextNode, tranfer.content());
+      this.produce(nextNode, transfer.content());
       this.outgoing.push(nextNode);
     }
   }
   
-  public transferDelivered(tranfer: Transfer): void {
-    console.log('transfer delivered', tranfer);
+  public transferDelivered(transfer: Transfer): void {
+    console.log('transfer delivered', transfer);
   }
   
   public width(): number {

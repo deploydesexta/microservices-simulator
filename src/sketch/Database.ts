@@ -61,11 +61,11 @@ class RDBMS extends Database {
     this.update(x, y);
   }
 
-  public transferArrived(tranfer: Transfer): void {
+  public transferArrived(transfer: Transfer): void {
     this._ops += 1;
   }
   
-  public transferDelivered(tranfer: Transfer): void {
+  public transferDelivered(transfer: Transfer): void {
 
   }
 

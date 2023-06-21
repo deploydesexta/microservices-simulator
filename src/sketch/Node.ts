@@ -32,8 +32,8 @@ export abstract class Node {
   public abstract width(): number;
   public abstract height(): number;
   public abstract label(): string;
-  public abstract transferArrived(tranfer: Transfer): void;
-  public abstract transferDelivered(tranfer: Transfer): void;
+  public abstract transferArrived(transfer: Transfer): void;
+  public abstract transferDelivered(transfer: Transfer): void;
 
   public isBelow(x: number, y: number): boolean {
     const insideWidth = x > this.x && x < this.x + this.width();

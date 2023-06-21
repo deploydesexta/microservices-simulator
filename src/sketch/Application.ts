@@ -50,13 +50,13 @@ class Microservice extends Application {
     this.update(x, y);
   }
   
-  public transferArrived(tranfer: Transfer): void {
+  public transferArrived(transfer: Transfer): void {
     this.outgoing.forEach((node: Node) => {
-      this.produce(node, tranfer.content());
+      this.produce(node, transfer.content());
     });
   }
   
-  public transferDelivered(tranfer: Transfer): void {
+  public transferDelivered(transfer: Transfer): void {
 
   }
   
@@ -121,13 +121,13 @@ class Monolith extends Application {
     this.update(x, y);
   }
   
-  public transferArrived(tranfer: Transfer): void {
+  public transferArrived(transfer: Transfer): void {
     this.outgoing.forEach((node: Node) => {
-      this.produce(node, tranfer.content());
+      this.produce(node, transfer.content());
     });
   }
   
-  public transferDelivered(tranfer: Transfer): void {
+  public transferDelivered(transfer: Transfer): void {
 
   }
   
