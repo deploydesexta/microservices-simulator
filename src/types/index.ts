@@ -18,6 +18,10 @@ export type Content = {
   [n: string]: string;
 }
 
+export type KeyPressedEvent = {
+  keyCode: number
+}
+
 export type P5 = p5 & {
   editNode: EditNode;
   produce: (from: string, to: string, content: Content) => void;

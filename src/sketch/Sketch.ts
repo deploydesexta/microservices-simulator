@@ -1,5 +1,5 @@
 import { Node } from './Node';
-import { Content, P5 } from '../types';
+import { Content, P5, KeyPressedEvent } from '../types';
 import { TmpEdge } from './TmpEdge';
 import { Edge } from './Edge';
 import { Stage } from './Stage';
@@ -20,7 +20,9 @@ function Sketch(
   on: (event: string, hook: (message: Content) => void) => void,
   editNode: (node: Node) => void,
 ) {
-
+ 
+  const DELETE = sketch.DELETE;
+  const CTRL = sketch.CONTROL;
   const ALT = sketch.ALT;
   const SHIFT = sketch.SHIFT;
   const WIDTH = props.width;
@@ -43,6 +45,7 @@ function Sketch(
   sketch.mousePressed = mousePressed;
   sketch.mouseReleased = mouseReleased;
   sketch.windowResized = windowResized;
+  sketch.keyPressed = keyPressed;
   
   on('add_application', addApplication);
   on('set_application', updateApplication);
@@ -90,9 +93,20 @@ function Sketch(
     stage.draw();
   }
 
-  function altOrShiftKeyPressed(): boolean {
+  function altShiftOrCtrlKeyPressed(): boolean {
     const key = sketch.keyCode || 0;
-    return sketch.keyIsPressed && (key === ALT || key === SHIFT);
+    return sketch.keyIsPressed && (key === ALT || key === SHIFT || key === CTRL);
+  }
+
+  function deleteKeyPressed(event: KeyPressedEvent): boolean {
+    return event.keyCode === DELETE ;
+  }
+
+  function keyPressed(event: KeyPressedEvent) {
+    if(deleteKeyPressed(event) && target !== null) {
+      removeApplication(target)
+      removeEdge(target)
+    }
   }
   
   const nodeOfId = (id: string) => nodes.get(id)
@@ -123,7 +137,7 @@ function Sketch(
   function mousePressed() {
     target = nodeBelowMouse() || null;
   
-    if (target != null && altOrShiftKeyPressed()) {
+    if (target != null && altShiftOrCtrlKeyPressed()) {
       tmpNode = target;
       tmpEdge = new TmpEdge(sketch, target, sketch.mouseX, sketch.mouseY);
     }
@@ -142,6 +156,12 @@ function Sketch(
     }
     tmpEdge = null;
     tmpNode = null;
+  }
+
+  function removeApplication(node: Node) {
+    const nodeIndex = children.findIndex(child => child.id === node.id)
+    children.splice(nodeIndex, 1)
+    nodes.delete(node.id);
   }
 
   function addApplication(content: Content) {
@@ -215,6 +235,20 @@ function Sketch(
     const edge = new Edge(sketch, from, to);
     edges.push(edge);
     return edge;
+  }
+
+  function removeEdge(node: Node) {
+    const indexEdge = edges.findIndex((edge: Edge) => 
+      (edge.from.id === node.id) ||
+        (edge.to.id === node.id)
+    );
+    
+    if (indexEdge === -1) {
+      return null;
+    }
+    
+    edges.splice(indexEdge, 1);
+    removeEdge(node)
   }
 
   // From http://www.openprocessing.org/sketch/7029
