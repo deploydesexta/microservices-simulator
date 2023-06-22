@@ -6,7 +6,6 @@ import { Stage } from "./Stage";
 import { Transfer } from "./Transfer";
 
 abstract class Application extends Node implements Producer {
-  
   abstract produce(to: Node, message: { [key: string]: any; }): void;
   abstract updateProps(label: string): void;
 }
@@ -51,18 +50,18 @@ class LoadBalancer extends Application {
     this.update(x, y);
   }
   
-  public trasnferArrived(tranfer: Transfer): void {
-    console.log('transfer arrived', tranfer);
+  public transferArrived(transfer: Transfer): void {
+    console.log('transfer arrived', transfer);
     // round robing to outgoing nodes
     const nextNode = this.outgoing.shift();
     if (nextNode) {
-      this.produce(nextNode, tranfer.content());
+      this.produce(nextNode, transfer.content());
       this.outgoing.push(nextNode);
     }
   }
   
-  public transferDelivered(tranfer: Transfer): void {
-    console.log('transfer delivered', tranfer);
+  public transferDelivered(transfer: Transfer): void {
+    console.log('transfer delivered', transfer);
   }
   
   public width(): number {
@@ -87,5 +86,6 @@ class LoadBalancer extends Application {
 }
 
 export {
-  LoadBalancer,
-}
+  LoadBalancer
+};
+

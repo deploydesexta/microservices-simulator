@@ -6,7 +6,6 @@ import { Stage } from "./Stage";
 import { Transfer } from "./Transfer";
 
 abstract class Database extends Node implements Producer {
-  
   abstract produce(to: Node, message: { [key: string]: any; }): void;
   abstract updateProps(label: string): void;
 }
@@ -62,11 +61,11 @@ class RDBMS extends Database {
     this.update(x, y);
   }
 
-  public trasnferArrived(tranfer: Transfer): void {
+  public transferArrived(transfer: Transfer): void {
     this._ops += 1;
   }
   
-  public transferDelivered(tranfer: Transfer): void {
+  public transferDelivered(transfer: Transfer): void {
 
   }
 
@@ -93,5 +92,6 @@ class RDBMS extends Database {
 
 export {
   Database,
-  RDBMS,
-}
+  RDBMS
+};
+
