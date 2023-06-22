@@ -1,0 +1,17 @@
+.bar {
+  position: absolute;
+  background-color: var(--sidebar-bg-color, white);
+  top: var(--toolbar-height);
+  left: 0;
+  bottom: 0;
+  width: var(--sidebar-width);
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--sidebar-border-color);
+  cursor: default;
+  z-index: 6;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}

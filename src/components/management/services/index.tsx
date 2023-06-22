@@ -36,9 +36,9 @@ const ServiceGroup = ({ name, onClick, services }: ServiceGroupProps) => {
     <div>
       <b>{capitalize(name)}</b>
       {services.map((service) => (
-        <div className="col-12" key={service.id}>
+        <div className="d-grid col-12 py-1" key={service.id}>
           <button 
-            className="btn btn-primary btn-sm btn-services"
+            className="btn btn-primary btn-sm btn-block btn-services"
             onClick={() => onClick(service)}
           >
             {service.name}
@@ -63,11 +63,10 @@ const Services = () => {
   };
 
   return (
-    <div>
-      <h1>Services</h1>
+    <div className="container">
       <div className="row">
         {Object.keys(serviceGroups).map((group: string) => (
-          <div className="col-12 col-md-4 gy-3" key={group}>
+          <div className="col-12 gy-3" key={group}>
             <ServiceGroup
               name={group}
               onClick={onClick}

@@ -1,5 +1,24 @@
+:root {
+  --blue: #1e90ff;
+  --white: #ffffff;
+  /* Viewport settings */
+  --viewport-bg-color: #f3f3f3;
+  /* Toolbar settings */
+  --toolbar-height: 50px;
+  /* Sidebar settings */
+  --sidebar-width: 240px;
+  --sidebar-bg-color: #ffffff;
+  --sidebar-border-color: #e6e6e6;
+  /* Properties settings */
+  --propsbar-width: 240px;
+  --propsbar-bg-color: #ffffff;
+  --propsbar-border-color: #e6e6e6;
+}
+
 body {
   margin: 0;
+  overflow-x: hidden;
+  
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;

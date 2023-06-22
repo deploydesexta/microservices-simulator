@@ -8,6 +8,7 @@ import { RDBMS } from './Database';
 import { Transfer } from './Transfer';
 import { LoadBalancer } from './LoadBalancer';
 import { Job } from './Job';
+import { Camera } from 'p5';
 
 export type SketchProps = {
   width: number;
@@ -29,6 +30,7 @@ function Sketch(
   let tmpEdge: TmpEdge | null = null;
   let tmpNode: Node | null = null;
   let target: Node | null = null;
+  let camera: Camera;
 
   const nodes: Map<string, Node> = new Map();
   const children: Node[] = [];
@@ -38,9 +40,11 @@ function Sketch(
   sketch.editNode = editNode;
   sketch.setup = setup
   sketch.draw = draw;
+  sketch.touchMoved = touchMoved;
   sketch.mouseClicked = mouseClicked;
   sketch.mouseDragged = mouseDragged;
   sketch.mousePressed = mousePressed;
+  sketch.touchStarted = mousePressed;
   sketch.mouseReleased = mouseReleased;
   sketch.windowResized = windowResized;
   
@@ -66,14 +70,12 @@ function Sketch(
 
     sketch.createCanvas(WIDTH, HEIGHT);
     sketch.smooth();
+    // camera = sketch.createCamera();
   }
 
   function draw() {
-    sketch.background(255);
-    sketch.stroke(0);
-    sketch.strokeWeight(2);
-    sketch.noFill();
-    sketch.rect(0, 0, WIDTH, HEIGHT);
+    sketch.background(245);
+    sketch.cursor(sketch.HAND);
     
     edges.forEach((child: Edge) => {  
       child.draw();
@@ -106,7 +108,15 @@ function Sketch(
     sketch.resizeCanvas(sketch.windowWidth - 500, HEIGHT);
   }
 
-  function mouseClicked() { 
+  function touchMoved(event: TouchEvent) {
+    event.preventDefault();
+    console.log(event);
+    const eyeX = sketch.mouseX - sketch.pmouseX;
+    const eyeY = sketch.mouseY - sketch.pmouseY;
+    camera.move(eyeX, eyeY, 0);
+  }
+
+  function mouseClicked() {
     nodeBelowMouse()?.mouseClicked();
   }
 
@@ -117,7 +127,12 @@ function Sketch(
       } else {
         target.mouseDragged()
       }
+      return;
     }
+    
+    // const eyeX = sketch.mouseX - sketch.pmouseX;
+    // const eyeY = sketch.mouseY - sketch.pmouseY;
+    // camera.move(eyeX, eyeY, 0);
   }
   
   function mousePressed() {

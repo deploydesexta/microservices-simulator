@@ -1,0 +1,11 @@
+
+.main {
+  flex: 1;
+}
+
+.view {
+  top: var(--toolbar-height);
+  left: var(--sidebar-width);
+  background-color: var(--viewport-bg-color);
+  position: absolute;
+}

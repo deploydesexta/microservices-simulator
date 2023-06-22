@@ -56,7 +56,7 @@ const ApplicationForm = ({ node }: ApplicationFormProps) => {
         errors={errors}
         register={register}
       />
-      <div className="d-grid gap-2 d-md-flex justify-content-md-center py-3">
+      <div className="d-grid gap-2 col-12 py-3">
         <Button
           className="btn btn-secondary btn-sm"
           onClick={() => onSendRequest()}

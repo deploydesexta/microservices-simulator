@@ -1,0 +1,18 @@
+.toolbar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: var(--toolbar-height);
+  display: flex;
+  flex-direction: row;
+  z-index: 8;
+  background-color: black;
+  border-bottom: 1px solid black;
+  box-sizing: border-box;
+  
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}

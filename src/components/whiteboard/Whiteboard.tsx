@@ -14,9 +14,22 @@ function Whiteboard() {
 
   useEffect(() => {
     const p5 = require('p5');
-    const props = { width: window.innerWidth - 730, height: 600 };
+    if (!whiteboardRed.current) {
+      return;
+    }
 
-    whiteboardRed.current?.firstChild?.remove();
+    const props = {
+      left: 'var(--sidebar-width)',
+      top: 'var(--toolbar-height)',
+      width: window.innerWidth,
+      height: window.innerHeight - 60,
+    };
+
+    whiteboardRed.current.style.left = props.left;
+    whiteboardRed.current.style.top = props.top;
+    whiteboardRed.current.style.position = 'absolute';
+    whiteboardRed.current.firstChild?.remove();
+    
     const myP5 = new p5(
       (p5: P5) => Sketch(p5, props, eventListener.on, editNode), 
       whiteboardRed.current || undefined,

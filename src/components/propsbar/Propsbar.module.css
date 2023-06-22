@@ -1,0 +1,23 @@
+.propsbarContainer {
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: var(--propsbar-width);
+}
+
+.propsbar {
+  position: absolute;
+  top: var(--toolbar-height);
+  right: 0;
+  bottom: 0;
+  background: var(--propsbar-bg-color, rgba(255, 255, 255, 1));
+  left: 0;
+  border-left: 1px solid var(--propsbar-border-color, #e5e5e5);
+  
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
