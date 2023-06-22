@@ -9,6 +9,7 @@ import { Transfer } from './Transfer';
 import { LoadBalancer } from './LoadBalancer';
 import { Job } from './Job';
 import { Camera } from 'p5';
+import { AppState } from '@/store';
 
 export type SketchProps = {
   width: number;
@@ -21,7 +22,7 @@ function Sketch(
   on: (event: string, hook: (message: Content) => void) => void,
   editNode: (node: Node) => void,
 ) {
- 
+  
   const DELETE = sketch.DELETE;
   const CTRL = sketch.CONTROL;
   const ALT = sketch.ALT;
@@ -105,7 +106,7 @@ function Sketch(
   }
 
   function keyPressed(event: KeyPressedEvent) {
-    if(deleteKeyPressed(event) && target !== null) {
+    if (target !== null && deleteKeyPressed(event)) {
       removeApplication(target)
       removeEdge(target)
     }
@@ -124,7 +125,6 @@ function Sketch(
 
   function touchMoved(event: TouchEvent) {
     event.preventDefault();
-    console.log(event);
     const eyeX = sketch.mouseX - sketch.pmouseX;
     const eyeY = sketch.mouseY - sketch.pmouseY;
     camera.move(eyeX, eyeY, 0);

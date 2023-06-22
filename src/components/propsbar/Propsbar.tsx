@@ -6,6 +6,8 @@ function Propsbar() {
   return (
     <div className={styles.propsbarContainer}>
       <div className={styles.propsbar}>
+        <div className="mt-3 text-center">Properties</div>
+
         <div className="container">
           <Forms className="mt-3" />
         </div>

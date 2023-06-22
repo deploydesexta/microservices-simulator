@@ -1,5 +1,6 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import p5 from 'p5';
+import { useEffect, useRef, memo } from 'react';
 import './Whiteboard.css';
 import Sketch from '../../sketch/Sketch';
 import useStore from '../../store';
@@ -7,14 +8,14 @@ import { P5 } from '../../types';
 import useEvents from '../../store/event-emitter';
 
 function Whiteboard() {
+  console.log('rendering Whiteboard');
 
   const eventListener = useEvents();
   const editNode = useStore(state => state.editNode);
-  const whiteboardRed = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const p5 = require('p5');
-    if (!whiteboardRed.current) {
+    if (!containerRef.current) {
       return;
     }
 
@@ -25,14 +26,13 @@ function Whiteboard() {
       height: window.innerHeight - 60,
     };
 
-    whiteboardRed.current.style.left = props.left;
-    whiteboardRed.current.style.top = props.top;
-    whiteboardRed.current.style.position = 'absolute';
-    whiteboardRed.current.firstChild?.remove();
+    containerRef.current.style.left = props.left;
+    containerRef.current.style.top = props.top;
+    containerRef.current.style.position = 'absolute';
     
     const myP5 = new p5(
       (p5: P5) => Sketch(p5, props, eventListener.on, editNode), 
-      whiteboardRed.current || undefined,
+      containerRef.current || undefined,
     ) as P5;
 
     return () => {
@@ -42,10 +42,8 @@ function Whiteboard() {
   }, [eventListener, editNode]);
 
   return (
-    <div className="Whiteboard" ref={whiteboardRed}>
-      <h1>Loading...</h1>
-    </div>
+    <div className="Whiteboard" ref={containerRef} />
   );
 }
 
-export default Whiteboard;
+export default memo(Whiteboard);

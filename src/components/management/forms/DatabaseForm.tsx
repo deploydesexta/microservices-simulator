@@ -42,7 +42,7 @@ const DatabaseForm = ({ node }: DatabaseFormProps) => {
       data-testid="login-form"
       onSubmit={handleSubmit(onSubmit)}
     >
-      <h5>Editting {initialValue.label}</h5>
+      <h5 >Editting {initialValue.label}</h5>
       <Input
         className="mb-3"
         label="Label"
