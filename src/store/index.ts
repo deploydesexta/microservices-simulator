@@ -1,23 +1,20 @@
 import { create } from 'zustand'
-import { Node } from '@/sketch/Node';
+import { immer } from 'zustand/middleware/immer'
 
-export type EditNode = (node: Node) => void
-
-export type AppState = {
-  selectedNode: Node | null;
-  requestModalVisible: boolean;
-  editNode: EditNode;
-  toggleRequestModal: () => void;
+export type AppActions = {
+  toggleHelpModal: () => void;
 }
 
-const useStore = create<AppState>()(
-  (set) => ({
-    selectedNode: null,
-    requestModalVisible: false,
-    editNode: (node: Node) => set(() => ({ selectedNode: node })),
-    toggleRequestModal: () => set((state) => ({ requestModalVisible: !state.requestModalVisible })),
+export type AppState = {
+  helpModalVisible: boolean;
+}
+
+const useStore = create<AppState & AppActions>()(immer((set) => ({
+  helpModalVisible: false,
+  toggleHelpModal: () => set((state) => {
+    state.helpModalVisible = !state.helpModalVisible;
   }),
-);
+})));
 
 export const getState = useStore.getState;
 

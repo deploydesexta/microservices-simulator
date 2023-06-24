@@ -6,6 +6,7 @@ import Input from '@/components/ui-kit/input';
 import Button from '@/components/ui-kit/button';
 import { Database } from '@/sketch/models/Database';
 import useStateManager from '@/sketch/useStateManager';
+import { Tag } from 'lucide-react';
 
 const Schema = z.object({
   id: z.string(),
@@ -41,10 +42,9 @@ const DatabaseForm = ({ node }: DatabaseFormProps) => {
       data-testid="login-form"
       onSubmit={handleSubmit(onSubmit)}
     >
-      <h5 >Editting {initialValue.label}</h5>
       <Input
         className="mb-3"
-        label="Label"
+        label={<Tag size={16} />}
         name="label"
         errors={errors}
         register={register}

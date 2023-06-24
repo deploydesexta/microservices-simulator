@@ -1,5 +1,5 @@
-import { HelpCircle } from 'lucide-react';
 import styles from './Toolbar.module.css';
+import Help from './Help';
 
 function Toolbar() {
   return (
@@ -11,7 +11,7 @@ function Toolbar() {
       </div>
 
       <div className="d-flex me-2 align-items-center text-white text-decoration-none">
-        <HelpCircle width={24} />
+        <Help />
       </div>
     </div>
   )

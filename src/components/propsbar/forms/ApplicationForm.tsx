@@ -1,6 +1,5 @@
-import {nanoid} from 'nanoid';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { type SubmitHandler, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import Input from '@/components/ui-kit/input';
 import Button from '@/components/ui-kit/button';
@@ -10,16 +9,7 @@ import { Tag } from 'lucide-react';
 
 const Schema = z.object({
   id: z.string(),
-  label: z.string()
-    .nonempty('A label is required'),
-  x: z.number()
-    .nonnegative('X must be a positive number'),
-  y: z.number()
-    .nonnegative('Y must be a positive number'),
-  width: z.number()
-    .nonnegative('Width must be a positive number'),
-  height: z.number()
-    .nonnegative('Height must be a positive number'),
+  label: z.string().nonempty('A label is required'),
 });
 
 type FormData = z.infer<typeof Schema>
@@ -32,10 +22,6 @@ const ApplicationForm = ({ node }: ApplicationFormProps) => {
   const values = {
     id: node.id,
     label: node.label,
-    x: node.x,
-    y: node.y,
-    width: node.width,
-    height: node.height,
   };
 
   const { sendRequest, updateNode } = useStateManager();
@@ -59,52 +45,6 @@ const ApplicationForm = ({ node }: ApplicationFormProps) => {
       className={'form'}
       data-testid="login-form"
     >
-      <div className="row">
-        <div className="col-sm-12 col-md-6">
-          <Input
-            label="X"
-            name="x"
-            type='number'
-            errors={errors}
-            register={register}
-            onChange={onChange}
-          />
-        </div>
-        <div className="col-sm-12 col-md-6">
-          <Input
-            label="Y"
-            name="y"
-            type='number'
-            errors={errors}
-            register={register}
-            onChange={onChange}
-          />
-        </div>
-      </div>
-
-      <div className="row">
-        <div className="col-sm-12 col-md-6">
-          <Input
-            label="W"
-            name="width"
-            type='number'
-            errors={errors}
-            register={register}
-            onChange={onChange}
-          />
-        </div>
-        <div className="col-sm-12 col-md-6">
-          <Input
-            label="H"
-            name="height"
-            type='number'
-            errors={errors}
-            register={register}
-            onChange={onChange}
-          />
-        </div>
-      </div>
-
       <Input
         label={<Tag size={16} />}
         name="label"

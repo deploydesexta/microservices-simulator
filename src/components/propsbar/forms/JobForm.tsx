@@ -1,17 +1,16 @@
-import {nanoid} from 'nanoid';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { type SubmitHandler, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import Input from '@/components/ui-kit/input';
 import Button from '@/components/ui-kit/button';
 import { Job } from '@/sketch/models/Job';
-import stateManager from '@/sketch/StateManager';
 import useStateManager from '@/sketch/useStateManager';
+import { AlarmClock, Tag } from 'lucide-react';
 
 const Schema = z.object({
   id: z.string(),
-  label: z.string()
-    .nonempty('A label is required'),
+  label: z.string().nonempty('A label is required'),
+  delay: z.number().nonnegative('A positive delay is required'),
 });
 
 type FormData = z.infer<typeof Schema>
@@ -22,47 +21,56 @@ type JobFormProps = {
 
 const JobForm = ({ node }: JobFormProps) => {
   const initialValue = {
-    id: node.id || nanoid(3),
-    label: node.label || '',
+    id: node.id,
+    label: node.label,
+    delay: node.delay,
   };
   
-  const { updateNode } = useStateManager();
+  const { updateNode, startJob, stopJob } = useStateManager();
 
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+  const { register, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(Schema),
     values: initialValue,
   })
 
-  const onSubmit: SubmitHandler<FormData> = async (data) => {
-    updateNode({ ...data });
-  };
+  const onChange = (attr: string, value: any) => 
+    updateNode({ id: node.id, [attr]: value });
 
-  const onStop = async () => {
-    stateManager.stopJob({ id: node.id });
-  };
-
-  const onStart = async () => {
-    stateManager.startJob({ id: node.id });
-  };
+  const onStop = () => stopJob({ id: node.id })
+  const onStart = () => startJob({ id: node.id })
 
   return (
     <form
       className={'form'}
       data-testid="login-form"
-      onSubmit={handleSubmit(onSubmit)}
     >
-      <h5 className="text-center">Editting {initialValue.label}</h5>
-      <Input
-        className="mb-3"
-        label="Label"
-        name="label"
-        errors={errors}
-        register={register}
-      />
-      <div className="d-grid gap-2 d-md-flex justify-content-md-center py-3">
-        <Button className="btn btn-default btn-sm" type="button" onClick={onStop}>Stop</Button>
-        <Button className="btn btn-default btn-sm" type="button" onClick={onStart}>Start</Button>
-        <Button className="btn btn-primary btn-sm" type="submit">Save</Button>
+      <div className="row">
+        <div className="col-sm-12 col-md-12">
+          <Input
+            label={<AlarmClock size={16} />}
+            name="delay"
+            type='number'
+            errors={errors}
+            register={register}
+            onChange={onChange}
+          />
+        </div>
+      </div>
+
+      <div className="row">
+        <div className="col-sm-12 col-md-12">
+          <Input
+            className="mb-3"
+            label={<Tag size={16} />}
+            name="label"
+            errors={errors}
+            register={register}
+          />
+        </div>
+      </div>
+      <div className="d-grid gap-2 d-md-flex justify-content-md-center">
+        <Button className="btn btn-primary btn-sm" type="button" onClick={onStop}>Stop</Button>
+        <Button className="btn btn-primary btn-sm" type="button" onClick={onStart}>Start</Button>
       </div>
     </form>
   );

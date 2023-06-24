@@ -12,7 +12,7 @@ class Job extends Node {
   private jobImage = '/assets/job.png';
   
   public label: string;
-  public  delay: number;
+  public delay: number;
   
   private producer: Producer;
   private cron: NodeJS.Timer | null = null;
@@ -40,20 +40,17 @@ class Job extends Node {
   }
   
   public startCron() {
-    this.cron = setInterval(() => {
-      this.outgoing.forEach((to: Node) => {
-        this.producer.produce(new Transfer(this, to, { message: "Hello World!" }));
-      });
-    }, this.delay);
+    console.log('Starting cron');
+    this.cron = setInterval(this.worker.bind(this), this.delay);
   }
 
   public stopCron() {
+    console.log('Stopping cron');
     if (this.cron) {
       clearInterval(this.cron);
       this.cron = null;
     }
   }
-
 
   public transferArrived(transfer: Transfer): void {
 
@@ -64,9 +61,25 @@ class Job extends Node {
   }
 
   public updateState(payload: Payload): void {
-    this.x = payload.x;
-    this.y = payload.y;
-    this.label = payload.label;
+    this.x = payload.x !== undefined ? payload.x : this.x;
+    this.y = payload.y !== undefined ? payload.y : this.y;
+    this.label = payload.label !== undefined ? payload.label : this.label;
+
+    if (payload.delay !== undefined) {
+      this.delay = payload.delay;
+      this.resetJob();
+    }
+  }
+
+  private resetJob() {
+    this.stopCron();
+    this.startCron();
+  }
+  
+  private worker() {
+    this.outgoing.forEach((to: Node) => {
+      this.producer.produce(new Transfer(this, to, { message: "Hello World!" }));
+    });
   }
 }
 

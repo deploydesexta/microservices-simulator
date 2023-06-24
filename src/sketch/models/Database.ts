@@ -13,6 +13,7 @@ class Database extends Node {
   private fireImage = '/assets/fire.png';
   
   public label: string;
+  public opsLimit: number;
   
   private producer: Producer;
   private ops: number;
@@ -27,6 +28,7 @@ class Database extends Node {
     this.producer = producer;
     this.label = label;
     this.ops = 0;
+    this.opsLimit = 5;
     this.start();
   }
 
@@ -34,7 +36,7 @@ class Database extends Node {
     const image = this.loadImage(sketch, this.dbImage);
     sketch.image(image, this.x, this.y, this.width, this.height);
     
-    if (this.ops >= 5) {
+    if (this.ops >= this.opsLimit) {
       const fire = this.loadImage(sketch, this.fireImage);
       sketch.image(fire, this.x, this.y, this.width, this.height);
     }
@@ -55,9 +57,10 @@ class Database extends Node {
   }
 
   public updateState(payload: Payload): void {
-    this.x = payload.x;
-    this.y = payload.y;
-    this.label = payload.label;
+    this.x = payload.x !== undefined ? payload.x : this.x;
+    this.y = payload.y !== undefined ? payload.y : this.y;
+    this.label = payload.label !== undefined ? payload.label : this.label;
+    this.opsLimit = payload.opsLimit !== undefined ? payload.opsLimit : this.opsLimit;
   }
 
   public start(): void {

@@ -30,6 +30,8 @@ export const Events = {
   MoveNode: 'MOVE_NODE',
   // Actors
   SendRequest: 'SEND_REQUEST',
+  StartJob: 'START_JOB',
+  StopJob: 'STOP_JOB',
 }
 
 export type State = {
@@ -144,16 +146,22 @@ export class StateManager implements Producer {
       case Events.SendRequest:
         this.sendRequest(payload);
         break;
+      case Events.StartJob:
+        this.startJob(payload);
+        break;
+      case Events.StopJob:
+        this.stopJob(payload);
+        break;
     }
 
     this.observers.forEach((observer) => observer(cmd));
   }
 
-  public stopJob(payload: Payload) {
+  private stopJob(payload: Payload) {
     (this.nodeOfId(payload.id) as Job)?.stopCron();
   }
   
-  public startJob(payload: Payload) {
+  private startJob(payload: Payload) {
     (this.nodeOfId(payload.id) as Job)?.startCron();
   }
 

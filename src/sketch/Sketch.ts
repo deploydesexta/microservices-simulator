@@ -2,7 +2,7 @@ import { P5, KeyPressedEvent } from '@/types';
 import { Node } from './models/Node';
 import { TmpEdge } from './models/TmpEdge';
 import { Edge } from './models/Edge';
-import { Camera, Renderer } from 'p5';
+import { Renderer } from 'p5';
 import { StateManager, Events } from '@/sketch/StateManager';
 
 export type SketchProps = {
@@ -20,6 +20,7 @@ function Sketch(sketch: P5, state: StateManager) {
   const HEIGHT = window.innerHeight// - 52;
 
   let tmpEdge: TmpEdge | null = null;
+  let tmpNode: Node | null = null;
   let canvas: Renderer;
   let eyeX = 0;
   let eyeY = 0;
@@ -40,6 +41,7 @@ function Sketch(sketch: P5, state: StateManager) {
     canvas.touchStarted(mousePressed);
     canvas.mouseReleased(mouseReleased);
     canvas.mouseWheel(mouseWheel);
+    canvas.mouseOut(mouseOut);
   }
 
   function draw() {
@@ -59,7 +61,7 @@ function Sketch(sketch: P5, state: StateManager) {
     state.stage().draw(sketch);
   }
 
-  function nodeBelowMouse() {
+  function nodeBelowMouse(): Node | undefined {
     return state.nodeBelow(mouseX(), mouseY());
   }
 
@@ -96,18 +98,27 @@ function Sketch(sketch: P5, state: StateManager) {
       selectNode(node);
     }
   }
+  
+  function mousePressed() {
+    console.log('mousePressed');
+    tmpNode = nodeBelowMouse() || null;
+
+    if (tmpNode && altShiftOrCtrlKeyPressed()) {
+      tmpEdge = new TmpEdge(tmpNode, mouseX(), mouseY());
+    }
+  }
 
   function mouseDragged() {
-    const target = state.selectedNode();
-    if (target) {
+    console.log('mouseDragged');
+    if (tmpNode) {
       const mX = mouseX();
       const mY = mouseY();
       if (tmpEdge) {
         tmpEdge.update(mX, mY);
       } else {
-        const x = mX - (target.width / 2);
-        const y = mY - (target.height / 2);
-        state.dispatch({ event: Events.UpdateNode, payload: { id: target.id, x, y } });
+        const x = mX - (tmpNode.width / 2);
+        const y = mY - (tmpNode.height / 2);
+        state.dispatch({ event: Events.UpdateNode, payload: { id: tmpNode.id, x, y } });
       }
       return;
     }
@@ -115,17 +126,25 @@ function Sketch(sketch: P5, state: StateManager) {
     eyeX += sketch.mouseX - sketch.pmouseX;
     eyeY += sketch.mouseY - sketch.pmouseY;
   }
-  
-  function mousePressed() {
-    const target = nodeBelowMouse();
-    selectNode(target);
 
-    if (target && altShiftOrCtrlKeyPressed()) {
-      tmpEdge = new TmpEdge(target, mouseX(), mouseY());
-    }
+  function mouseWheel(e: WheelEvent) {
+    console.log('mouseWheel', e);
+    // const factor = Math.pow(1.01, e.deltaX);
+    // const newZoom = zoom * factor;
+    // const dx = mouseX() - WIDTH / 2;
+    // const dy = mouseY() - HEIGHT / 2;
+    // eyeX += dx / zoom - dx / newZoom;
+    // eyeY += dy / zoom - dy / newZoom;
+    // zoom = newZoom;
+  }
+
+  function mouseOut() {
+    console.log('mouseOut');
+    tmpNode = null;
   }
 
   function mouseReleased() {
+    console.log('mouseReleased');
     const tmpNode = state.selectedNode();
     if (tmpEdge && tmpNode) {
       const from = tmpNode;
@@ -164,17 +183,6 @@ function Sketch(sketch: P5, state: StateManager) {
     return sketch.mouseY - eyeY;
   }
   
-  function mouseWheel(e: WheelEvent) {
-    console.log('mouseWheel', e);
-    // const factor = Math.pow(1.01, e.deltaX);
-    // const newZoom = zoom * factor;
-    // const dx = mouseX() - WIDTH / 2;
-    // const dy = mouseY() - HEIGHT / 2;
-    // eyeX += dx / zoom - dx / newZoom;
-    // eyeY += dy / zoom - dy / newZoom;
-    // zoom = newZoom;
-  }
-
   // From http://www.openprocessing.org/sketch/7029
   /*
    * Draws a lines with arrows of the given angles at the ends.

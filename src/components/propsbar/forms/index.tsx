@@ -5,6 +5,7 @@ import { Job } from "@/sketch/models/Job";
 import ApplicationForm from "./ApplicationForm";
 import DatabaseForm from "./DatabaseForm";
 import JobForm from "./JobForm";
+import NodeForm from "./NodeForm";
 
 type FormsProps = {
   className?: string;
@@ -24,6 +25,7 @@ const Forms = ({ className }: FormsProps) => {
 
   return (
     <div className={className}>
+      { target && <NodeForm node={target as Application} /> }
       { form }
     </div>
   )

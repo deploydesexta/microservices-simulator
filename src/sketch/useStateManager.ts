@@ -13,6 +13,12 @@ const useStateManager = (selector?: (state: State) => Partial<State>) => {
 
   const sendRequest = (data: Payload) => 
     stateManager.dispatch({ event: Events.SendRequest, payload: data });
+  
+  const startJob = (data: Payload) => 
+    stateManager.dispatch({ event: Events.StartJob, payload: data });
+  
+  const stopJob = (data: Payload) => 
+    stateManager.dispatch({ event: Events.StopJob, payload: data });
 
   useEffect(() => {
     const callback = () => setState(stateManager.getState().target);
@@ -21,7 +27,7 @@ const useStateManager = (selector?: (state: State) => Partial<State>) => {
     return unsubscribe;
   }, [selector]);
 
-  return { addNode, sendRequest, state, updateNode };
+  return { addNode, sendRequest, state, startJob, stopJob, updateNode };
 };
 
 export default useStateManager;

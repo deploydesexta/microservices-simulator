@@ -28,18 +28,6 @@ const Input = <FormData extends FieldValues>(
       {errors[name] && <span>{errors[name]?.message?.toString()}</span>}
     </div>
   </div>
-  // <div className="form-group">
-  //   <label>{label}</label>
-  //   <input 
-  //     type={type}
-  //     className={`${className} form-control`}
-      
-  //     {...register(name, {
-  //       onChange: (e) => onChange && onChange(name, e.target.value)
-  //     })}
-  //   />
-  //   {errors[name] && <span>{errors[name]?.message?.toString()}</span>}
-  // </div>
 );
 
 export default Input;
