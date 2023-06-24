@@ -1,6 +1,6 @@
 import { capitalize, groupBy } from 'lodash';
 import { nanoid } from 'nanoid';
-import useEvents from '../../../store/event-emitter';
+import useStateManager from '@/sketch/useStateManager';
 import './services.css';
 
 type ServiceItem = {
@@ -50,16 +50,10 @@ const ServiceGroup = ({ name, onClick, services }: ServiceGroupProps) => {
 };
 
 const Services = () => {
-  const { emit } = useEvents();
+  const { addNode } = useStateManager();
 
   const onClick = (service: ServiceItem) => {
-    const data = { id: nanoid(3), type: service.id, label: service.name };
-
-    switch (service.group) {
-      case 'applications': emit('add_application', data); break;
-      case 'databases': emit('add_database', data); break;
-      case 'job': emit('add_job', data); break;
-    }
+    addNode({ id: nanoid(3), type: service.id, label: service.name });
   };
 
   return (

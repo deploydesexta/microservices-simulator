@@ -1,6 +1,7 @@
 @import '@radix-ui/colors/blackA.css';
 @import '@radix-ui/colors/mauve.css';
 @import '@radix-ui/colors/violet.css';
+@import '@radix-ui/colors/blue.css';
 
 :root {
   --blue: #1e90ff;
@@ -11,7 +12,8 @@
   --toolbar-height: 50px;
   --toolbar-bg-color: #2c2c2c;
   /* Sidebar settings */
-  --sidebar-width: 240px;
+  --sidebar-width: 50px;
+  --sidebar-height: 300px;
   --sidebar-bg-color: #ffffff;
   --sidebar-border-color: #e6e6e6;
   /* Properties settings */
@@ -34,4 +36,20 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+.form-control {
+  padding: 5px;
 }

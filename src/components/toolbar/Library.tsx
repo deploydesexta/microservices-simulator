@@ -1,8 +1,8 @@
 'use client';
 import { nanoid } from 'nanoid';
 import { groupBy } from 'lodash';
-import useEvents from '@/store/event-emitter';
 import Dropdown, { DropdownItem } from "@/components/ui-kit/dropdown-menu";
+import useStateManager from '@/sketch/useStateManager';
 
 const services: DropdownItem[] = [
   { id: 'monolith', name: 'Monolith', group: 'applications' },
@@ -20,16 +20,10 @@ const services: DropdownItem[] = [
 
 
 function Library() {
-  const { emit } = useEvents();
+  const { addNode } = useStateManager();
 
   const onClick = (service: DropdownItem) => {
-    const data = { id: nanoid(3), type: service.id, label: service.name };
-
-    switch (service.group) {
-      case 'applications': emit('add_application', data); break;
-      case 'databases': emit('add_database', data); break;
-      case 'job': emit('add_job', data); break;
-    }
+    addNode({ id: nanoid(3), type: service.id, label: service.name });
   };
 
   return (

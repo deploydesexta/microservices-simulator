@@ -1,17 +1,80 @@
-.bar {
+@-webkit-keyframes slide {
+  0% { 
+    left: 0;
+    opacity: 0;
+  }
+  
+  50% { 
+    left: 0;
+    opacity: 0.5;
+  }
+
+  100% { 
+    left: calc(var(--sidebar-width) + 16px);
+    opacity: 1;
+  }
+}
+
+@keyframes slide {
+  0% { 
+    left: 0;
+    opacity: 0;
+  }
+  
+  50% { 
+    left: 0;
+    opacity: 0.5;
+  }
+
+  100% { 
+    left: calc(var(--sidebar-width) + 16px);
+    opacity: 1;
+  }
+}
+
+.sideBar {
   position: absolute;
   background-color: var(--sidebar-bg-color, white);
-  top: var(--toolbar-height);
-  left: 0;
-  bottom: 0;
+  top: 20%;
+  left: 8px;
+  bottom: var(--sidebar-height);
   width: var(--sidebar-width);
   display: flex;
   flex-direction: column;
-  border-right: 1px solid var(--sidebar-border-color);
-  cursor: default;
-  z-index: 6;
+  border: 1px solid var(--sidebar-border-color);
+  border-radius: 5px;
+  z-index: 80;
+  cursor: pointer;
+
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+.sideBarComponent {
+  position: absolute;
+  background-color: var(--sidebar-bg-color, white);
+  top: 15%;
+  bottom: 15%;
+  width: 250px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--sidebar-border-color);
+  border-radius: 5px;
+  z-index: 80;
+  cursor: pointer;
+
+  -webkit-animation: slide 0.1s forwards;
+  animation: slide 0.1s forwards;
+  transition-timing-function: ease-in-out;
+  
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.active {
+  background-color: var(--blue-6);
 }

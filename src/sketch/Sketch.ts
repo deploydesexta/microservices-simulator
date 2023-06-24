@@ -1,99 +1,68 @@
-import { Node } from './Node';
-import { Content, P5, KeyPressedEvent } from '../types';
-import { TmpEdge } from './TmpEdge';
-import { Edge } from './Edge';
-import { Stage } from './Stage';
-import { Application, Microservice, Monolith } from './Application';
-import { RDBMS } from './Database';
-import { Transfer } from './Transfer';
-import { LoadBalancer } from './LoadBalancer';
-import { Job } from './Job';
-import { Camera } from 'p5';
-import { AppState } from '@/store';
+import { P5, KeyPressedEvent } from '@/types';
+import { Node } from './models/Node';
+import { TmpEdge } from './models/TmpEdge';
+import { Edge } from './models/Edge';
+import { Renderer } from 'p5';
+import { StateManager, Events } from '@/sketch/StateManager';
 
 export type SketchProps = {
   width: number;
   height: number;
 }
 
-function Sketch(
-  sketch: P5,
-  props: SketchProps,
-  on: (event: string, hook: (message: Content) => void) => void,
-  editNode: (node: Node) => void,
-) {
+function Sketch(sketch: P5, state: StateManager) {
   
   const DELETE = sketch.DELETE;
   const CTRL = sketch.CONTROL;
   const ALT = sketch.ALT;
   const SHIFT = sketch.SHIFT;
-  const WIDTH = props.width;
-  const HEIGHT = props.height;
+  const WIDTH = window.innerWidth// - 240;
+  const HEIGHT = window.innerHeight// - 52;
 
   let tmpEdge: TmpEdge | null = null;
   let tmpNode: Node | null = null;
-  let target: Node | null = null;
-  let camera: Camera;
+  let canvas: Renderer;
+  let eyeX = 0;
+  let eyeY = 0;
+  let zoom = 1.0;
 
-  const nodes: Map<string, Node> = new Map();
-  const children: Node[] = [];
-  const edges: Edge[] = [];
-  const stage = new Stage()
-
-  sketch.editNode = editNode;
   sketch.setup = setup
   sketch.draw = draw;
-  sketch.touchMoved = touchMoved;
-  sketch.mouseClicked = mouseClicked;
   sketch.mouseDragged = mouseDragged;
-  sketch.mousePressed = mousePressed;
-  sketch.touchStarted = mousePressed;
-  sketch.mouseReleased = mouseReleased;
   sketch.windowResized = windowResized;
   sketch.keyPressed = keyPressed;
-  
-  on('add_application', addApplication);
-  on('set_application', updateApplication);
-  on('add_database', addDatabase);
-  on('add_job', addJob);
-  on('stop_job', stopJob);
-  on('start_job', startJob);
-  on('send_request', sendRequest);
+  sketch.images = {};
 
   function setup() {
-    sketch.images = {
-      cache: sketch.loadImage('/assets/cache.png'),
-      cluster: sketch.loadImage('/assets/cluster.png'),
-      database: sketch.loadImage('/assets/database.png'),
-      fire: sketch.loadImage('/assets/fire.png'),
-      job: sketch.loadImage('/assets/job.png'),
-      loadBalancer: sketch.loadImage('/assets/loadBalancer.png'),
-      microservice: sketch.loadImage('/assets/microservice.png'),
-      monolith: sketch.loadImage('/assets/monolith.png'),
-    }
-
-    sketch.createCanvas(WIDTH, HEIGHT);
-    sketch.smooth();
-    // camera = sketch.createCamera();
+    canvas = sketch.createCanvas(WIDTH, HEIGHT);
+    canvas.touchMoved(touchMoved);
+    canvas.mouseClicked(mouseClicked);
+    canvas.mousePressed(mousePressed);
+    canvas.touchStarted(mousePressed);
+    canvas.mouseReleased(mouseReleased);
+    canvas.mouseWheel(mouseWheel);
+    canvas.mouseOut(mouseOut);
   }
 
   function draw() {
     sketch.background(245);
+    sketch.translate(eyeX, eyeY);
     sketch.cursor(sketch.HAND);
     
-    edges.forEach((child: Edge) => {  
-      child.draw();
+    state.allEdges().forEach(child => {
+      child.draw(sketch);
     });
-
-    children.forEach((child: Node) => {  
-      child.draw();
+    
+    state.allNodes().forEach(child => {
+      child.draw(sketch);
     });
-  
-    if (tmpEdge != null) {
-      tmpEdge.draw();
-    }
+    
+    tmpEdge?.draw(sketch);
+    state.stage().draw(sketch);
+  }
 
-    stage.draw();
+  function nodeBelowMouse(): Node | undefined {
+    return state.nodeBelow(mouseX(), mouseY());
   }
 
   function altShiftOrCtrlKeyPressed(): boolean {
@@ -106,17 +75,10 @@ function Sketch(
   }
 
   function keyPressed(event: KeyPressedEvent) {
-    if (target !== null && deleteKeyPressed(event)) {
-      removeApplication(target)
-      removeEdge(target)
+    const target = nodeBelowMouse();
+    if (target && deleteKeyPressed(event)) {
+      state.dispatch({ event: Events.RemoveNode, payload: { id: target.id }})
     }
-  }
-  
-  const nodeOfId = (id: string) => nodes.get(id)
-  
-  const nodeBelowMouse = () => {
-    const {mouseX, mouseY} = sketch
-    return children.find((child: Node) => child.isBelow(mouseX, mouseY))
   }
 
   function windowResized() {
@@ -125,40 +87,65 @@ function Sketch(
 
   function touchMoved(event: TouchEvent) {
     event.preventDefault();
-    const eyeX = sketch.mouseX - sketch.pmouseX;
-    const eyeY = sketch.mouseY - sketch.pmouseY;
-    camera.move(eyeX, eyeY, 0);
+    eyeX += sketch.mouseX - sketch.pmouseX;
+    eyeY += sketch.mouseY - sketch.pmouseY;
   }
 
   function mouseClicked() {
-    nodeBelowMouse()?.mouseClicked();
+    console.log('mouseClicked');
+    const node = nodeBelowMouse();
+    if (node) {
+      selectNode(node);
+    }
+  }
+  
+  function mousePressed() {
+    console.log('mousePressed');
+    tmpNode = nodeBelowMouse() || null;
+
+    if (tmpNode && altShiftOrCtrlKeyPressed()) {
+      tmpEdge = new TmpEdge(tmpNode, mouseX(), mouseY());
+    }
   }
 
   function mouseDragged() {
-    if (target) {
+    console.log('mouseDragged');
+    if (tmpNode) {
+      const mX = mouseX();
+      const mY = mouseY();
       if (tmpEdge) {
-        tmpEdge.mouseDragged();
+        tmpEdge.update(mX, mY);
       } else {
-        target.mouseDragged()
+        const x = mX - (tmpNode.width / 2);
+        const y = mY - (tmpNode.height / 2);
+        state.dispatch({ event: Events.UpdateNode, payload: { id: tmpNode.id, x, y } });
       }
       return;
     }
     
-    // const eyeX = sketch.mouseX - sketch.pmouseX;
-    // const eyeY = sketch.mouseY - sketch.pmouseY;
-    // camera.move(eyeX, eyeY, 0);
+    eyeX += sketch.mouseX - sketch.pmouseX;
+    eyeY += sketch.mouseY - sketch.pmouseY;
   }
-  
-  function mousePressed() {
-    target = nodeBelowMouse() || null;
-  
-    if (target != null && altShiftOrCtrlKeyPressed()) {
-      tmpNode = target;
-      tmpEdge = new TmpEdge(sketch, target, sketch.mouseX, sketch.mouseY);
-    }
+
+  function mouseWheel(e: WheelEvent) {
+    console.log('mouseWheel', e);
+    // const factor = Math.pow(1.01, e.deltaX);
+    // const newZoom = zoom * factor;
+    // const dx = mouseX() - WIDTH / 2;
+    // const dy = mouseY() - HEIGHT / 2;
+    // eyeX += dx / zoom - dx / newZoom;
+    // eyeY += dy / zoom - dy / newZoom;
+    // zoom = newZoom;
+  }
+
+  function mouseOut() {
+    console.log('mouseOut');
+    tmpNode = null;
   }
 
   function mouseReleased() {
+    console.log('mouseReleased');
+    const tmpNode = state.selectedNode();
     if (tmpEdge && tmpNode) {
       const from = tmpNode;
       const target = nodeBelowMouse();
@@ -170,102 +157,32 @@ function Sketch(
       }
     }
     tmpEdge = null;
-    tmpNode = null;
+    selectNode(undefined);
   }
 
-  function removeApplication(node: Node) {
-    const nodeIndex = children.findIndex(child => child.id === node.id)
-    children.splice(nodeIndex, 1)
-    nodes.delete(node.id);
-  }
-
-  function addApplication(content: Content) {
-    const { id, label, type } = content;
-
-    let node;
-    if (type === 'loadbalancer') {
-      node = new LoadBalancer(sketch, stage, id, 50, 50, label)
-    } else if (type === 'microservice') {
-      node = new Microservice(sketch, stage, id, 50, 50, label)
-    } else {
-      node = new Monolith(sketch, stage, id, 50, 50, label)
-    }
-
-    children.push(node);
-    nodes.set(id, node)
-  }
-  
-  function updateApplication(content: Content) {
-    const { id, label } = content;
-    const node = nodeOfId(id) as Application;
-    if (node) {
-      node.updateProps(label);
-    }
-  }
-
-  function addDatabase(content: Content) {
-    const { id, label } = content;
-    const node = new RDBMS(sketch, stage, id, 50, 50, label);
-    children.push(node);
-    nodes.set(id, node);
-  }
-  
-  function addJob(content: Content) {
-    const { id, label } = content;
-    const node = new Job(sketch, stage, id, 50, 50, label);
-    children.push(node);
-    nodes.set(id, node);
-  }
-
-  function stopJob(content: Content) {
-    (nodeOfId(content.id) as Job)?.stopCron();
-  }
-  
-  function startJob(content: Content) {
-    (nodeOfId(content.id) as Job)?.startCron();
-  }
-  
-  function sendRequest(content: Content) {    
-    const from = nodeOfId(content.from);
-    const to = nodeOfId(content.to);
-
-    if (from && to) {
-      stage.push(new Transfer(sketch, from, to, content))
-    } else if (from) {
-      from.outgoing.forEach((to: Node) => {
-        stage.push(new Transfer(sketch, from, to, content))
-      });
-    }
+  function selectNode(node: Node | undefined) {
+    state.dispatch({ event: Events.SelectNode, payload: { id: node?.id }});
   }
 
   function addEdge(from: Node, to: Node) {
-    const existentEdge = edges.find((edge: Edge) => 
-      (edge.from === from && edge.to === to) ||
-        (edge.to === from && edge.from === to)
-    );
+    const existentEdge = state.edgeBetweenNodes(from, to);
     if (existentEdge) {
       return null;
     }
     
-    const edge = new Edge(sketch, from, to);
-    edges.push(edge);
+    const edge = new Edge(from, to);
+    state.dispatch({ event: Events.SetEdge, payload: { edge } });
     return edge;
   }
 
-  function removeEdge(node: Node) {
-    const indexEdge = edges.findIndex((edge: Edge) => 
-      (edge.from.id === node.id) ||
-        (edge.to.id === node.id)
-    );
-    
-    if (indexEdge === -1) {
-      return null;
-    }
-    
-    edges.splice(indexEdge, 1);
-    removeEdge(node)
+  function mouseX() {
+    return sketch.mouseX - eyeX;
   }
-
+  
+  function mouseY() {
+    return sketch.mouseY - eyeY;
+  }
+  
   // From http://www.openprocessing.org/sketch/7029
   /*
    * Draws a lines with arrows of the given angles at the ends.

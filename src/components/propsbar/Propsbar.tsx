@@ -1,5 +1,5 @@
 'use client';
-import Forms from '../management/forms';
+import Forms from './forms';
 import styles from './Propsbar.module.css';
 
 function Propsbar() {
