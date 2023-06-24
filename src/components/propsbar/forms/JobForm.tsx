@@ -2,10 +2,11 @@ import {nanoid} from 'nanoid';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 import { z } from 'zod';
-import Input from '../../ui-kit/input';
-import Button from '../../ui-kit/button';
-import useEvents from '../../../store/event-emitter';
-import { Job } from '../../../sketch/Job';
+import Input from '@/components/ui-kit/input';
+import Button from '@/components/ui-kit/button';
+import { Job } from '@/sketch/models/Job';
+import stateManager from '@/sketch/StateManager';
+import useStateManager from '@/sketch/useStateManager';
 
 const Schema = z.object({
   id: z.string(),
@@ -16,16 +17,16 @@ const Schema = z.object({
 type FormData = z.infer<typeof Schema>
 
 type JobFormProps = {
-  node?: Job;
+  node: Job;
 }
 
 const JobForm = ({ node }: JobFormProps) => {
   const initialValue = {
-    id: node?.id || nanoid(3),
-    label: node?.label() || '',
+    id: node.id || nanoid(3),
+    label: node.label || '',
   };
   
-  const { emit } = useEvents();
+  const { updateNode } = useStateManager();
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(Schema),
@@ -33,15 +34,15 @@ const JobForm = ({ node }: JobFormProps) => {
   })
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
-    emit('set_job', { ...data });
+    updateNode({ ...data });
   };
 
   const onStop = async () => {
-    emit('stop_job', { ...initialValue });
+    stateManager.stopJob({ id: node.id });
   };
 
   const onStart = async () => {
-    emit('start_job', { ...initialValue });
+    stateManager.startJob({ id: node.id });
   };
 
   return (

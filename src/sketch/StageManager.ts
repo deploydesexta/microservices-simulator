@@ -1,19 +1,20 @@
-import { Transfer } from "./Transfer";
+import { P5 } from "@/types";
+import { Transfer } from "./models/Transfer";
 
-class Stage {
+class StageManager {
 
   private transfers: Transfer[] = [];
   
-  public push(transfer: Transfer) {
+  public add(transfer: Transfer) {
     this.transfers.push(transfer);
   }
 
-  public draw() {
+  public draw(sketch: P5) {
     for (let i = 0; i < this.transfers.length; i++) {
       const transfer = this.transfers[i];
 
       transfer.update();
-      transfer.draw();
+      transfer.draw(sketch);
 
       if (transfer.isFinished()) {
         transfer.notify();
@@ -23,6 +24,10 @@ class Stage {
   }
 }
 
+const stageManager = new StageManager();
+
 export {
-  Stage,
+  StageManager,
 }
+
+export default stageManager;

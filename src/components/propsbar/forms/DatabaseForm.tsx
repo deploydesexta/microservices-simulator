@@ -2,10 +2,10 @@ import {nanoid} from 'nanoid';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 import { z } from 'zod';
-import Input from '../../ui-kit/input';
-import Button from '../../ui-kit/button';
-import { Application } from '../../../sketch/Application';
-import useEvents from '../../../store/event-emitter';
+import Input from '@/components/ui-kit/input';
+import Button from '@/components/ui-kit/button';
+import { Database } from '@/sketch/models/Database';
+import useStateManager from '@/sketch/useStateManager';
 
 const Schema = z.object({
   id: z.string(),
@@ -16,24 +16,23 @@ const Schema = z.object({
 type FormData = z.infer<typeof Schema>
 
 type DatabaseFormProps = {
-  node?: Application;
+  node: Database;
 }
 
 const DatabaseForm = ({ node }: DatabaseFormProps) => {
   const initialValue = {
-    id: node?.id || nanoid(3),
-    label: node?.label() || '',
+    id: node.id || nanoid(3),
+    label: node.label || '',
   };
   
-  const { emit } = useEvents();
-
+  const { updateNode } = useStateManager();
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(Schema),
     values: initialValue,
   })
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
-    emit('set_database', { ...data });
+    updateNode({ ...data });
   };
 
   return (
