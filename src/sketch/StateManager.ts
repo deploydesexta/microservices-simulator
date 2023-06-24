@@ -1,5 +1,5 @@
 import { Node } from '@/sketch/models/Node';
-import { Edge } from '@/sketch/models/Edge';
+import { Connection } from '@/sketch/models/Connection';
 import { Job } from '@/sketch/models/Job';
 import { Transfer } from '@/sketch/models/Transfer';
 import { StageManager } from '@/sketch/StageManager';
@@ -19,9 +19,9 @@ export interface Producer {
 }
 
 export const Events = {
-  // Edges
-  RemoveEdge: 'REMOVE_EDGE',
-  SetEdge: 'SET_EDGE',
+  // Connections
+  RemoveConnection: 'REMOVE_CONNECTION',
+  SetConnection: 'SET_CONNECTION',
   // Nodes
   AddNode: 'ADD_NODE',
   UpdateNode: 'UPDATE_NODE',
@@ -37,7 +37,7 @@ export const Events = {
 export type State = {
   target: Node | undefined;
   nodes: Record<string, Node>;
-  edges: Record<string, Edge>;
+  connections: Record<string, Connection>;
   stage: StageManager;
 }
 
@@ -52,7 +52,7 @@ export class StateManager implements Producer {
     this.state = {
       target: undefined,
       nodes: {},
-      edges: {},
+      connections: {},
       stage: new StageManager(),
     };
   }
@@ -72,8 +72,8 @@ export class StateManager implements Producer {
     return this.state;
   }
 
-  public allEdges(): Edge[] {
-    return Object.values(this.state.edges);
+  public allConnections(): Connection[] {
+    return Object.values(this.state.connections);
   }
 
   public allNodes(): Node[] {
@@ -88,24 +88,17 @@ export class StateManager implements Producer {
     return this.state.nodes[id];
   }
 
-  public edgeOfNode(node: Node): Edge | undefined {
-    return this.allEdges().find((edge: Edge) => 
-      (edge.from.id === node.id) ||
-        (edge.to.id === node.id)
+  public allConnectionsOfNode(node: Node): Connection[] {
+    return this.allConnections().filter((conn: Connection) => 
+      (conn.from.id === node.id) ||
+        (conn.to.id === node.id)
     )
   }
 
-  public allEdgesOfNode(node: Node): Edge[] {
-    return this.allEdges().filter((edge: Edge) => 
-      (edge.from.id === node.id) ||
-        (edge.to.id === node.id)
-    )
-  }
-
-  public edgeBetweenNodes(from: Node, to: Node):  Edge | undefined {
-    return this.allEdges().find((edge: Edge) => 
-      (edge.from === from && edge.to === to) ||
-        (edge.to === from && edge.from === to)
+  public connectionBetween(from: Node, to: Node):  Connection | undefined {
+    return this.allConnections().find((conn: Connection) => 
+      (conn.from === from && conn.to === to) ||
+        (conn.to === from && conn.from === to)
     );
   }
   
@@ -125,11 +118,11 @@ export class StateManager implements Producer {
     const { event, payload } = cmd;
 
     switch (event) {
-      case Events.RemoveEdge:
-        this.deleteEdge(payload.id);
+      case Events.RemoveConnection:
+        this.deleteConnection(payload.id);
         break;
-      case Events.SetEdge:
-        this.setEdge(payload.edge);
+      case Events.SetConnection:
+        this.setConnection(payload.connection);
         break;
       case Events.RemoveNode:
         this.deleteNode(payload.id);
@@ -181,21 +174,21 @@ export class StateManager implements Producer {
     if (node) {
       delete this.state.nodes[id];
 
-      this.allEdgesOfNode(node)
-        .forEach(edge => this.deleteEdge(edge.id));
+      this.allConnectionsOfNode(node)
+        .forEach(conn => this.deleteConnection(conn.id));
     }
   }
 
-  private setEdge(payload: Payload) {
-    this.state.edges[payload.id] = payload as Edge;
+  private setConnection(payload: Payload) {
+    this.state.connections[payload.id] = payload as Connection;
   }
 
-  private deleteEdge(id: string) {
-    const edge = this.state.edges[id];
-    if (edge) {
-      edge.from.disconnect(edge.to);
-      edge.to.disconnect(edge.from);
-      delete this.state.edges[id];
+  private deleteConnection(id: string) {
+    const conn = this.state.connections[id];
+    if (conn) {
+      conn.from.disconnect(conn.to);
+      conn.to.disconnect(conn.from);
+      delete this.state.connections[id];
     }
   }
 

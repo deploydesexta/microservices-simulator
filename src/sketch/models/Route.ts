@@ -4,7 +4,7 @@ import { Node } from "./Node";
 
 const defaultColor = Colors.red;
 
-class TmpEdge {
+export class Route {
   
   constructor(
     public from: Node,
@@ -23,8 +23,4 @@ class TmpEdge {
     this.toX = x;
     this.toY = y;
   }
-}
-
-export {
-  TmpEdge,
 }

@@ -1,7 +1,7 @@
 import { P5, KeyPressedEvent } from '@/types';
 import { Node } from './models/Node';
-import { TmpEdge } from './models/TmpEdge';
-import { Edge } from './models/Edge';
+import { Route } from './models/Route';
+import { Connection } from './models/Connection';
 import { Renderer } from 'p5';
 import { StateManager, Events } from '@/sketch/StateManager';
 
@@ -19,7 +19,7 @@ function Sketch(sketch: P5, state: StateManager) {
   const WIDTH = window.innerWidth// - 240;
   const HEIGHT = window.innerHeight// - 52;
 
-  let tmpEdge: TmpEdge | null = null;
+  let tmpRoute: Route | null = null;
   let tmpNode: Node | null = null;
   let canvas: Renderer;
   let eyeX = 0;
@@ -49,7 +49,7 @@ function Sketch(sketch: P5, state: StateManager) {
     sketch.translate(eyeX, eyeY);
     sketch.cursor(sketch.HAND);
     
-    state.allEdges().forEach(child => {
+    state.allConnections().forEach(child => {
       child.draw(sketch);
     });
     
@@ -57,7 +57,7 @@ function Sketch(sketch: P5, state: StateManager) {
       child.draw(sketch);
     });
     
-    tmpEdge?.draw(sketch);
+    tmpRoute?.draw(sketch);
     state.stage().draw(sketch);
   }
 
@@ -104,7 +104,7 @@ function Sketch(sketch: P5, state: StateManager) {
     tmpNode = nodeBelowMouse() || null;
 
     if (tmpNode && altShiftOrCtrlKeyPressed()) {
-      tmpEdge = new TmpEdge(tmpNode, mouseX(), mouseY());
+      tmpRoute = new Route(tmpNode, mouseX(), mouseY());
     }
   }
 
@@ -113,8 +113,8 @@ function Sketch(sketch: P5, state: StateManager) {
     if (tmpNode) {
       const mX = mouseX();
       const mY = mouseY();
-      if (tmpEdge) {
-        tmpEdge.update(mX, mY);
+      if (tmpRoute) {
+        tmpRoute.update(mX, mY);
       } else {
         const x = mX - (tmpNode.width / 2);
         const y = mY - (tmpNode.height / 2);
@@ -145,17 +145,17 @@ function Sketch(sketch: P5, state: StateManager) {
 
   function mouseReleased() {
     console.log('mouseReleased');
-    if (tmpEdge && tmpNode) {
+    if (tmpRoute && tmpNode) {
       const from = tmpNode;
       const target = nodeBelowMouse();
       if (target && from.id !== target.id) {
-        if (addEdge(from, target)) {
+        if (connectNodes(from, target)) {
           from.connectWith(target);
           target.connectedWith(from);
         }
       }
     }
-    tmpEdge = null;
+    tmpRoute = null;
     tmpNode = null;
   }
 
@@ -163,15 +163,15 @@ function Sketch(sketch: P5, state: StateManager) {
     state.dispatch({ event: Events.SelectNode, payload: { id: node?.id }});
   }
 
-  function addEdge(from: Node, to: Node) {
-    const existentEdge = state.edgeBetweenNodes(from, to);
-    if (existentEdge) {
+  function connectNodes(from: Node, to: Node) {
+    const existentConn = state.connectionBetween(from, to);
+    if (existentConn) {
       return null;
     }
     
-    const edge = new Edge(from, to);
-    state.dispatch({ event: Events.SetEdge, payload: { edge } });
-    return edge;
+    const connection = new Connection(from, to);
+    state.dispatch({ event: Events.SetConnection, payload: { connection } });
+    return connection;
   }
 
   function mouseX() {

@@ -5,7 +5,7 @@ import { Node } from "./Node";
 
 const defaultColor = Colors.black;
 
-class Edge {
+export class Connection {
   
   constructor(
     public from: Node,
@@ -40,8 +40,4 @@ class Edge {
       sketch.arrowHead(x0, y0, size, sketch.atan2(y1 - y0, x1 - x0), sketch.radians(30), false);
     }
   }
-}
-
-export {
-  Edge,
 }
