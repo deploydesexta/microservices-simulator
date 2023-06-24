@@ -199,8 +199,8 @@ export class StateManager implements Producer {
     if (from && to) {
       this.produce(new Transfer(from, to, { message: 'HI' }))
     } else if (from) {
-      from.outgoing.forEach((to: Node) => {
-        this.produce(new Transfer(from, to, { message: 'HI' }))
+      from.outgoing.forEach((conn: Connection) => {
+        this.produce(new Transfer(from, conn.to, { message: 'HI' }))
       });
     }
   }

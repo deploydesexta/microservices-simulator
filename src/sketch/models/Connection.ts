@@ -1,24 +1,44 @@
 import { uniqueId } from "@/utils/id";
-import { P5 } from "@/types";
+import { Content, P5 } from "@/types";
 import { Colors } from "./Constants";
 import { Node } from "./Node";
 
 const defaultColor = Colors.black;
 
-export class Connection {
+export class Predicate {
   
   constructor(
+    public property: string,
+    public value: string,
+  ) {}
+}
+
+export class Connection {
+  
+  private constructor(
     public from: Node,
     public to: Node,
-    public id: string = uniqueId(),
-    public color: string = defaultColor,
+    public id: string,
+    public color: string,
+    public predicates: Predicate[],
   ) {}
+  
+  static create(from: Node, to: Node): Connection {
+    return new Connection(from, to, uniqueId(), defaultColor, []);
+  }
 
   public draw(sketch: P5) {
     sketch.stroke(this.color);
     sketch.strokeWeight(3);
     sketch.line(this.from.middleX, this.from.middleY, this.to.middleX, this.to.middleY);
     this.drawArrowHead(sketch);
+  }
+
+  public satisfies(content: Content) {
+    const mismatch = 
+      this.predicates.find((predicate: Predicate) => content[predicate.property] !== predicate.value);
+    
+    return mismatch === undefined;
   }
 
   private drawArrowHead(sketch: P5): void {

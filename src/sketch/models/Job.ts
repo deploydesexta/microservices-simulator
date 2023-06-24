@@ -77,8 +77,8 @@ class Job extends Node {
   }
   
   private worker() {
-    this.outgoing.forEach((to: Node) => {
-      this.producer.produce(new Transfer(this, to, { message: "Hello World!" }));
+    this.outgoing.forEach(conn => {
+      this.producer.produce(new Transfer(this, conn.to, { message: "Start" }));
     });
   }
 }

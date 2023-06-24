@@ -1,6 +1,7 @@
 import { P5 } from "@/types";
 import { Transfer } from "./Transfer";
 import { Payload } from "@/sketch/StateManager";
+import { Connection } from "./Connection";
 
 const labelHeight = 15;
 
@@ -11,8 +12,8 @@ export abstract class Node {
   public y: number;
   public width: number;
   public height: number;
-  public incoming: Node[];
-  public outgoing: Node[];
+  public incoming: Connection[];
+  public outgoing: Connection[];
 
   constructor(id: string, x: number, y: number, width: number, height: number) {
     this.id = id;
@@ -53,23 +54,30 @@ export abstract class Node {
     return image;
   }
 
-  public connectWith(node: Node) {
+  public connectWith(node: Node): Connection | null {
     if (!this.outgoing) {
       this.outgoing = [];
     }
-    this.outgoing.push(node);
+
+    if (this.outgoing.find(conn => conn.to.id === node.id)) {
+      return null;
+    }
+
+    const conn = Connection.create(this, node);
+    this.outgoing.push(conn);
+    return conn;
   }
 
   public connectedWith(node: Node) {
     if (!this.incoming) {
       this.incoming = [];
     }
-    this.incoming.push(node);
+    this.incoming.push(Connection.create(node, this));
   }
 
   public disconnect(node: Node) {
-    this.outgoing = this.outgoing.filter(n => n.id !== node.id);
-    this.incoming = this.incoming.filter(n => n.id !== node.id);
+    this.outgoing = this.outgoing.filter(conn => conn.to.id !== node.id);
+    this.incoming = this.incoming.filter(conn => conn.from.id !== node.id);
   }
   
   get middleX (): number {

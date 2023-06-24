@@ -22,7 +22,7 @@ export class LoadBalancer extends Application {
     // round robing to outgoing nodes
     const nextNode = this.outgoing.shift();
     if (nextNode) {
-      this.producer.produce(new Transfer(this, nextNode, transfer.content));
+      this.producer.produce(new Transfer(this, nextNode.to, transfer.content));
       this.outgoing.push(nextNode);
     }
   }

@@ -1,7 +1,6 @@
 import { P5, KeyPressedEvent } from '@/types';
 import { Node } from './models/Node';
 import { Route } from './models/Route';
-import { Connection } from './models/Connection';
 import { Renderer } from 'p5';
 import { StateManager, Events } from '@/sketch/StateManager';
 
@@ -147,11 +146,11 @@ function Sketch(sketch: P5, state: StateManager) {
     console.log('mouseReleased');
     if (tmpRoute && tmpNode) {
       const from = tmpNode;
-      const target = nodeBelowMouse();
-      if (target && from.id !== target.id) {
-        if (connectNodes(from, target)) {
-          from.connectWith(target);
-          target.connectedWith(from);
+      const to = nodeBelowMouse();
+      if (to && from.id !== to.id) {
+        const connection = from.connectWith(to);
+        if (connection) {
+          state.dispatch({ event: Events.SetConnection, payload: { connection } });
         }
       }
     }
@@ -161,17 +160,6 @@ function Sketch(sketch: P5, state: StateManager) {
 
   function selectNode(node: Node | undefined) {
     state.dispatch({ event: Events.SelectNode, payload: { id: node?.id }});
-  }
-
-  function connectNodes(from: Node, to: Node) {
-    const existentConn = state.connectionBetween(from, to);
-    if (existentConn) {
-      return null;
-    }
-    
-    const connection = new Connection(from, to);
-    state.dispatch({ event: Events.SetConnection, payload: { connection } });
-    return connection;
   }
 
   function mouseX() {

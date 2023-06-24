@@ -2,6 +2,7 @@ import { P5 } from "@/types";
 import { Node } from "../Node";
 import { Transfer } from "../Transfer";
 import { Payload, Producer } from "@/sketch/StateManager";
+import { Connection } from "../Connection";
 
 const scale = 3;
 const defaultWidth = 146 / scale;
@@ -35,9 +36,9 @@ export class Application extends Node {
   }
   
   public transferArrived(transfer: Transfer): void {
-    this.outgoing.forEach((node: Node) => {
-      this.producer.produce(new Transfer(this, node, transfer.content));
-    });
+    this.outgoing
+      .filter(conn => conn.satisfies(transfer.content))
+      .forEach(conn => this.producer.produce(new Transfer(this, conn.to, transfer.content)));
   }
   
   public transferDelivered(transfer: Transfer): void {
