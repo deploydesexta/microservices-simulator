@@ -145,7 +145,6 @@ function Sketch(sketch: P5, state: StateManager) {
 
   function mouseReleased() {
     console.log('mouseReleased');
-    const tmpNode = state.selectedNode();
     if (tmpEdge && tmpNode) {
       const from = tmpNode;
       const target = nodeBelowMouse();
@@ -157,7 +156,7 @@ function Sketch(sketch: P5, state: StateManager) {
       }
     }
     tmpEdge = null;
-    selectNode(undefined);
+    tmpNode = null;
   }
 
   function selectNode(node: Node | undefined) {

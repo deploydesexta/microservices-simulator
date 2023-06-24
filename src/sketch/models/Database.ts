@@ -47,6 +47,7 @@ class Database extends Node {
   }
   
   public transferArrived(transfer: Transfer): void {
+    this.ops += 1;
     this.outgoing.forEach((node: Node) => {
       this.producer.produce(new Transfer(this, node, transfer.content));
     });
