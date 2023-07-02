@@ -19,9 +19,13 @@ export interface Producer {
 }
 
 export const Events = {
+  // Mouse
+  MouseMove: 'MOUSE_MOVE',
   // Connections
   RemoveConnection: 'REMOVE_CONNECTION',
   SetConnection: 'SET_CONNECTION',
+  UpdateConnection: 'UPDATE_CONNECTION',
+  SelectConnection: 'SELECT_CONNECTION',
   // Nodes
   AddNode: 'ADD_NODE',
   UpdateNode: 'UPDATE_NODE',
@@ -35,7 +39,7 @@ export const Events = {
 }
 
 export type State = {
-  target: Node | undefined;
+  target: Node | Connection | undefined;
   nodes: Record<string, Node>;
   connections: Record<string, Connection>;
   stage: StageManager;
@@ -103,18 +107,14 @@ export class StateManager implements Producer {
   }
   
   public nodeBelow(x: number, y: number): Node | undefined {
-    return this.allNodes().find((child) => child.isBelow(x, y));
+    return this.allNodes().find((child) => child.isBelow(x, y))
   }
 
-  public selectNode(node: Node | undefined) {
-    this.dispatch({ event: Events.SelectNode, payload: { node }});
+  public connectionBelow(x: number, y: number): Connection | undefined {
+    return this.allConnections().find((child) => child.isBelow(x, y))
   }
 
-  public selectedNode():  Node | undefined {
-    return this.state.target;
-  }
-
-  public dispatch(cmd: Event): void {
+  public dispatch(cmd: Event, silent: boolean = false): void {
     const { event, payload } = cmd;
 
     switch (event) {
@@ -122,7 +122,10 @@ export class StateManager implements Producer {
         this.deleteConnection(payload.id);
         break;
       case Events.SetConnection:
-        this.setConnection(payload.connection);
+        this.setConnection(payload);
+        break;
+      case Events.UpdateConnection:
+        this.updateConnection(payload);
         break;
       case Events.RemoveNode:
         this.deleteNode(payload.id);
@@ -134,7 +137,10 @@ export class StateManager implements Producer {
         this.updateNode(payload);
         break;
       case Events.SelectNode:
-        this.state.target = this.nodeOfId(payload.id);
+        this.state.target = payload as Node;
+        break;
+      case Events.SelectConnection:
+        this.state.target = payload as Connection;
         break;
       case Events.SendRequest:
         this.sendRequest(payload);
@@ -147,7 +153,9 @@ export class StateManager implements Producer {
         break;
     }
 
-    this.observers.forEach((observer) => observer(cmd));
+    if (!silent) {
+      this.observers.forEach((observer) => observer(cmd));
+    }
   }
 
   private stopJob(payload: Payload) {
@@ -183,6 +191,13 @@ export class StateManager implements Producer {
     this.state.connections[payload.id] = payload as Connection;
   }
 
+  private updateConnection(payload: Payload) {
+    const conn = this.state.connections[payload.id];
+    if (conn) {
+      conn.updateState(payload);
+    }
+  }
+  
   private deleteConnection(id: string) {
     const conn = this.state.connections[id];
     if (conn) {

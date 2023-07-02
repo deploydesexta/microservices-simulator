@@ -1,9 +1,8 @@
 import {nanoid} from 'nanoid';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { type SubmitHandler, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import Input from '@/components/ui-kit/input';
-import Button from '@/components/ui-kit/button';
 import { Database } from '@/sketch/models/Database';
 import useStateManager from '@/sketch/useStateManager';
 import { Tag } from 'lucide-react';
@@ -27,20 +26,20 @@ const DatabaseForm = ({ node }: DatabaseFormProps) => {
   };
   
   const { updateNode } = useStateManager();
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+
+  const { register, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(Schema),
     values: initialValue,
   })
-
-  const onSubmit: SubmitHandler<FormData> = async (data) => {
-    updateNode({ ...data });
+  
+  const onChange = (attr: string, value: any) => {
+    updateNode({ id: node.id, [attr]: value });
   };
 
   return (
     <form
       className={'form'}
       data-testid="login-form"
-      onSubmit={handleSubmit(onSubmit)}
     >
       <Input
         className="mb-3"
@@ -48,10 +47,8 @@ const DatabaseForm = ({ node }: DatabaseFormProps) => {
         name="label"
         errors={errors}
         register={register}
+        onChange={onChange}
       />
-      <div className="d-grid gap-2 d-md-flex justify-content-md-center py-3">
-        <Button className="btn btn-primary btn-sm" type="submit">Save</Button>
-      </div>
     </form>
   );
 };

@@ -1,12 +1,18 @@
 'use client';
 import p5 from 'p5';
-import { useLayoutEffect, useRef, memo, useState } from 'react';
-import './Whiteboard.css';
+import { useLayoutEffect, useRef, memo, useState, useEffect } from 'react';
 import { P5 } from '@/types';
+import ws from '@/lib/socket';
 import stateManager from '@/sketch/StateManager';
 import Sketch from '@/sketch/Sketch';
+import './Whiteboard.css';
 
-function Whiteboard() {
+type Props = {
+  boardId: string;
+  userId: string;
+}
+
+function Whiteboard({ boardId, userId }: Props) {
   console.log('rendering Whiteboard');
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -26,6 +32,11 @@ function Whiteboard() {
       setSketch(myP5);
     }
   }, [sketch]);
+
+  useEffect(() => {
+    const closeable = ws.listen(boardId, userId);
+    return closeable;
+  }, [boardId]);
 
   return (
     <div className="Whiteboard" ref={containerRef} />

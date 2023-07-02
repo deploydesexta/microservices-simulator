@@ -8,13 +8,22 @@ import styles from './page.module.css'
 
 const Whiteboard = dynamic(() => import('@/components/whiteboard/Whiteboard'), { ssr: false });
 
-export default function Home() {
+type PageProps = {
+  params: {
+    id: string
+  },
+  searchParams: {
+    userId: string
+  }
+};
+
+export default function Home({ params, searchParams }: PageProps) {
   return (
     <main className={styles.main}>
       <Suspense fallback={
         <div style={{position: 'absolute', left: 'var(--sidebar-width)', top: 'var(--toolbar-height)'}}>LOADING...</div>
       }>
-        <Whiteboard boardId="1" userId="1" />
+        <Whiteboard boardId={params.id} userId={searchParams.userId} />
       </Suspense>
       <Toolbar />
       <Sidebar />

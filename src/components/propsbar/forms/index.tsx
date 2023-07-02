@@ -6,6 +6,9 @@ import ApplicationForm from "./ApplicationForm";
 import DatabaseForm from "./DatabaseForm";
 import JobForm from "./JobForm";
 import NodeForm from "./NodeForm";
+import { Connection } from "@/sketch/models/Connection";
+import ConnectionForm from "./ConnectionForm";
+import { Node } from "@/sketch/models/Node";
 
 type FormsProps = {
   className?: string;
@@ -14,18 +17,22 @@ type FormsProps = {
 const Forms = ({ className }: FormsProps) => {
   const { state: target } = useStateManager();
 
+  let connection = false;
   let form = null;
   if (target instanceof Application) {
-    form = <ApplicationForm node={target as Application} />
+    form =   <ApplicationForm node={target} />
   } else if (target instanceof Database) {
-    form = <DatabaseForm node={target as Database} />
+    form = <DatabaseForm node={target} />
   } else if (target instanceof Job) {
-    form = <JobForm node={target as Job} />
+    form = <JobForm node={target} />
+  } else if (target instanceof Connection) {
+    connection = true
+    form = <ConnectionForm connection={target} />
   }
 
   return (
     <div className={className}>
-      { target && <NodeForm node={target as Application} /> }
+      { target && !connection && <NodeForm node={target as Node} /> }
       { form }
     </div>
   )

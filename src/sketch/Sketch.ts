@@ -3,6 +3,7 @@ import { Node } from './models/Node';
 import { Route } from './models/Route';
 import { Renderer } from 'p5';
 import { StateManager, Events } from '@/sketch/StateManager';
+import { Connection } from './models/Connection';
 
 export type SketchProps = {
   width: number;
@@ -41,6 +42,7 @@ function Sketch(sketch: P5, state: StateManager) {
     canvas.mouseReleased(mouseReleased);
     canvas.mouseWheel(mouseWheel);
     canvas.mouseOut(mouseOut);
+    canvas.mouseMoved(mouseMoved);
   }
 
   function draw() {
@@ -62,6 +64,10 @@ function Sketch(sketch: P5, state: StateManager) {
 
   function nodeBelowMouse(): Node | undefined {
     return state.nodeBelow(mouseX(), mouseY());
+  }
+  
+  function connectionBelowMouse(): Connection | undefined {
+    return state.connectionBelow(mouseX(), mouseY());
   }
 
   function altShiftOrCtrlKeyPressed(): boolean {
@@ -94,7 +100,12 @@ function Sketch(sketch: P5, state: StateManager) {
     console.log('mouseClicked');
     const node = nodeBelowMouse();
     if (node) {
-      selectNode(node);
+      state.dispatch({ event: Events.SelectNode, payload: node });
+    }
+    
+    const connection = connectionBelowMouse();
+    if (connection) {
+      state.dispatch({ event: Events.SelectConnection, payload: connection });
     }
   }
   
@@ -141,6 +152,13 @@ function Sketch(sketch: P5, state: StateManager) {
     console.log('mouseOut');
     tmpNode = null;
   }
+  
+  function mouseMoved() {
+    // state.dispatch({
+    //   event: Events.MouseMove,
+    //   payload: { x: sketch.mouseX, y: sketch.mouseY }
+    // });
+  }
 
   function mouseReleased() {
     console.log('mouseReleased');
@@ -150,16 +168,12 @@ function Sketch(sketch: P5, state: StateManager) {
       if (to && from.id !== to.id) {
         const connection = from.connectWith(to);
         if (connection) {
-          state.dispatch({ event: Events.SetConnection, payload: { connection } });
+          state.dispatch({ event: Events.SetConnection, payload: connection });
         }
       }
     }
     tmpRoute = null;
     tmpNode = null;
-  }
-
-  function selectNode(node: Node | undefined) {
-    state.dispatch({ event: Events.SelectNode, payload: { id: node?.id }});
   }
 
   function mouseX() {

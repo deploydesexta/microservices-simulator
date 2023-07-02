@@ -2,15 +2,13 @@ import { uniqueId } from "@/utils/id";
 import { Content, P5 } from "@/types";
 import { Colors } from "./Constants";
 import { Node } from "./Node";
+import { Payload } from "../StateManager";
 
 const defaultColor = Colors.black;
 
-export class Predicate {
-  
-  constructor(
-    public property: string,
-    public value: string,
-  ) {}
+export type Predicate = {
+  property: string;
+  value: string;
 }
 
 export class Connection {
@@ -39,6 +37,42 @@ export class Connection {
       this.predicates.find((predicate: Predicate) => content[predicate.property] !== predicate.value);
     
     return mismatch === undefined;
+  }
+
+  public isBelow(x: number, y: number) {
+    const x0 = this.from.middleX;
+    const y0 = this.from.middleY;
+    const x1 = this.to.middleX;
+    const y1 = this.to.middleY;
+    const x2 = x;
+    const y2 = y;
+    const numerator = Math.abs((y1 - y0) * x2 - (x1 - x0) * y2 + x1 * y0 - y1 * x0);
+    const denominator = Math.sqrt(Math.pow(y1 - y0, 2) + Math.pow(x1 - x0, 2));
+    return (numerator / denominator) < 2;
+  }
+
+  public updateState(payload: Payload): void {
+    this.color = payload.color !== undefined ? payload.color : this.color;
+
+    Object.keys(payload)
+      .filter(it => it.startsWith('predicate'))
+      .forEach((key: string) => {
+        const [_, index, prop] = key.split('.');
+        const predicate = this.predicates[parseInt(index)];
+        if (predicate !== undefined) {
+          if (prop === 'property') {
+            predicate.property = payload[key];
+          } else if (prop === 'value') {
+            predicate.value = payload[key];
+          }
+        } else {
+          this.predicates.push({
+            value: '',
+            property: '',
+            [prop]: payload[key],
+          });
+        }
+      });
   }
 
   private drawArrowHead(sketch: P5): void {
